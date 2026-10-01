@@ -1,0 +1,757 @@
+/* ==========================================================================
+   AnthroFit OS - Modern Design System
+   Sleek, tactile, hyper-modern aesthetics without standard boilerplate look
+   ========================================================================== */
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  --bg-primary: #0a0b0e;
+  --bg-surface: #12141a;
+  --bg-card: #181b24;
+  --bg-subtle: #202430;
+  
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(59, 130, 246, 0.35);
+  
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --accent-cyan: #06b6d4;
+  --accent-blue: #3b82f6;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  
+  --gradient-glow: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+  --shadow-elevation: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+  --radius-xl: 18px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* App Header Nav */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(16px);
+  background-color: rgba(10, 11, 14, 0.85);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 2.5rem;
+}
+
+.brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+.brand-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+}
+
+.mode-nav {
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--bg-surface);
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-light);
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mode-btn:hover {
+  color: var(--text-main);
+}
+
+.mode-btn.active {
+  background-color: var(--accent-blue);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.header-status-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--accent-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+/* Main Container */
+.main-viewport {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 4rem 2.5rem;
+}
+
+/* Storefront View Styling */
+.storefront-container {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 3.5rem;
+  align-items: start;
+}
+
+.gallery-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero-visual-card {
+  background: radial-gradient(circle at 50% 40%, #1e2230 0%, #11131a 100%);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-elevation);
+}
+
+.hero-vector-art {
+  width: 380px;
+  height: 440px;
+  transition: transform 0.4s ease;
+}
+
+.hero-visual-card:hover .hero-vector-art {
+  transform: scale(1.02);
+}
+
+.product-selector-pills {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.product-thumb-pill {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.product-thumb-pill:hover {
+  background: var(--bg-card);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.product-thumb-pill.selected {
+  border-color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.08);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.15);
+}
+
+/* Detail Form Section */
+.product-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.retailer-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-eyebrow-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+}
+
+.item-sku-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.item-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.item-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.item-price {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.item-tax-note {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.item-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* The Traditional Size Tag (Crossed out) vs AnthroFit Smart Pill */
+.sizing-experience-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.sizing-experience-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+}
+
+.legacy-size-comparison {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed var(--border-light);
+}
+
+.legacy-label-strikethrough {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.striked-sizes {
+  text-decoration: line-through;
+  opacity: 0.6;
+  font-family: var(--font-mono);
+}
+
+.eliminated-badge {
+  background: rgba(244, 63, 94, 0.12);
+  color: var(--accent-rose);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Reference Garment Anchor Box */
+.anchor-selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.anchor-selector-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.anchor-select-input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.anchor-select-input:focus {
+  border-color: var(--accent-cyan);
+}
+
+/* Preference Toggles (True, Fitted, Relaxed) */
+.pref-toggles {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+}
+
+.pref-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.pref-btn.active {
+  background: var(--bg-subtle);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+/* The AnthroFit Smart Dynamic Pill */
+.anthrofit-smart-pill {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(59, 130, 246, 0.15) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.1);
+  position: relative;
+}
+
+.smart-pill-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.match-verdict-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.confidence-chip {
+  background: #10b981;
+  color: #042f2e;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.smart-pill-recs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.recommended-cut-badge {
+  color: #fff;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.risk-drop-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--accent-emerald);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+/* Friction Alerts List */
+.friction-points-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.friction-row {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.friction-zone-name {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.friction-delta-tag {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.friction-delta-tag.optimal {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-emerald);
+}
+
+.friction-delta-tag.noticeable {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-amber);
+}
+
+.friction-delta-tag.friction {
+  background: rgba(244, 63, 94, 0.15);
+  color: var(--accent-rose);
+}
+
+.friction-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Buy Button */
+.add-to-cart-btn {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.add-to-cart-btn:hover {
+  background: #f1f5f9;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
+}
+
+/* Silhouette Overlay Drawer / Modal */
+.overlay-viewer-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.overlay-viewer-toggle-btn:hover {
+  background: var(--bg-card);
+  color: #fff;
+  border-color: var(--border-accent);
+}
+
+/* Analytics Dashboard Styling */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.kpi-delta {
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.kpi-delta.good {
+  color: var(--accent-emerald);
+}
+
+.dashboard-split-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.chart-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* API Playground Styling */
+.api-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.code-box {
+  background: #0d0f14;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.825rem;
+  color: #cbd5e1;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+
+/* Pitch Presentation View */
+.pitch-container {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.pitch-slide-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 3rem;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-elevation);
+  position: relative;
+  overflow: hidden;
+}
+
+.pitch-slide-card::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.pitch-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.pitch-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pitch-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pitch-dot.active {
+  background: var(--accent-cyan);
+  width: 24px;
+  border-radius: var(--radius-pill);
+}
+
+.nav-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--accent-cyan);
+}
+
+/* Criteria Grid in Pitch */
+.criteria-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.criteria-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.criteria-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+}

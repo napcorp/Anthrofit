@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnthroFit OS | Comparative Garment Tolerance Platform</title>
+  
+  <!-- Modern Clean Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="app-header">
+    <div class="brand-badge">
+      <div class="brand-logo-icon">Δ</div>
+      <div>
+        <div style="font-weight: 800; line-height: 1.1;">AnthroFit OS</div>
+        <div style="font-size: 0.65rem; color: var(--text-dim); font-family: var(--font-mono); letter-spacing: 0.05em;">REVERSE GARMENT TOLERANCE ENGINE</div>
+      </div>
+    </div>
+
+    <!-- Mode Selector Navigation -->
+    <nav class="mode-nav">
+      <button class="mode-btn active" data-view="storefront">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span>Storefront Experience</span>
+      </button>
+
+      <button class="mode-btn" data-view="b2b_dashboard">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        <span>Enterprise Analytics</span>
+      </button>
+
+      <button class="mode-btn" data-view="api_playground">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <span>Developer API</span>
+      </button>
+
+      <button class="mode-btn" data-view="pitch_deck">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+        <span>Pitch Deck</span>
+      </button>
+    </nav>
+
+    <!-- Operational Engine Status Indicator -->
+    <div class="header-status-pill">
+      <span class="pulse-dot"></span>
+      <span>CAD Engine 100% Offline Active</span>
+    </div>
+  </header>
+
+  <!-- Dynamic View Render Target -->
+  <main class="main-viewport" id="mainContentContainer">
+    <!-- Populated dynamically by app.js -->
+  </main>
+
+  <!-- Core Application Script -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

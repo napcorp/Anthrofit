@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>AnthroFit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   TOKENS
+================================================================ */
+:root {
+  --w: #fff; --b: #09090b;
+  --g50:#fafafa; --g100:#f4f4f5; --g150:#ebebed; --g200:#e4e4e7;
+  --g300:#d1d1d6; --g400:#a1a1aa; --g500:#71717a;
+  --g600:#52525b; --g700:#3f3f46; --g800:#27272a; --g900:#18181b;
+  --green:#16a34a; --g50g:#f0fdf4; --g200g:#bbf7d0;
+  --amber:#d97706; --g50a:#fffbeb;
+  --red:#dc2626;   --g50r:#fef2f2;
+  --blue:#2563eb;  --g50b:#eff6ff;
+  --r4:4px; --r8:8px; --r12:12px; --r16:16px; --r20:20px; --r28:28px; --rpill:9999px;
+  --sh1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh2:0 4px 12px rgba(0,0,0,.07),0 1px 3px rgba(0,0,0,.04);
+  --sh3:0 12px 32px rgba(0,0,0,.1),0 2px 6px rgba(0,0,0,.05);
+  --sh4:0 24px 56px rgba(0,0,0,.14),0 4px 12px rgba(0,0,0,.07);
+  --ea:cubic-bezier(.4,0,.2,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ================================================================
+   RESET
+================================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;height:100%}
+body{
+  font-family:'Inter',-apple-system,sans-serif;
+  background:var(--g50); color:var(--b);
+  -webkit-font-smoothing:antialiased; min-height:100%;
+  overscroll-behavior:none; overflow-x:hidden;
+}
+button,input,select,textarea{font-family:inherit}
+
+/* ================================================================
+   NAV — ghost glass
+================================================================ */
+.nav{
+  position:sticky;top:0;z-index:80;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:saturate(200%) blur(24px);
+  -webkit-backdrop-filter:saturate(200%) blur(24px);
+  border-bottom:1px solid rgba(0,0,0,.07);
+  height:54px; display:flex; align-items:center; padding:0 20px;
+}
+.nav-inner{width:100%;max-width:560px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.brand-mark{
+  width:30px;height:30px;background:var(--b);border-radius:8px;
+  display:grid;place-items:center;
+}
+.brand-name{font-weight:800;font-size:14px;letter-spacing:-.04em;color:var(--b)}
+.brand-sub{font-size:9.5px;color:var(--g400);letter-spacing:.08em;text-transform:uppercase;margin-top:-1px}
+
+.nav-right{display:flex;align-items:center;gap:8px}
+.btn-wardrobe{
+  display:flex;align-items:center;gap:6px;height:34px;padding:0 13px;
+  background:transparent;border:1px solid var(--g200);border-radius:var(--rpill);
+  font-size:13px;font-weight:600;color:var(--g600);cursor:pointer;
+  transition:all .14s;
+}
+.btn-wardrobe:hover{border-color:var(--g400);color:var(--b);background:var(--g50)}
+.w-count{
+  min-width:17px;height:17px;padding:0 5px;background:var(--b);color:#fff;
+  border-radius:var(--rpill);font-size:10px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+
+/* ================================================================
+   SLIDE ENGINE — horizontal push transitions
+================================================================ */
+.flow{
+  position:relative; overflow:hidden;
+  min-height:calc(100dvh - 54px);
+}
+.slide{
+  position:absolute; inset:0;
+  overflow-y:auto; overflow-x:hidden;
+  padding:0 16px 96px;
+  transition:transform .48s cubic-bezier(.32,.72,0,1), opacity .36s var(--ea);
+  will-change:transform,opacity;
+}
+.slide.s-current{transform:translateX(0);opacity:1;position:relative;min-height:calc(100dvh - 54px)}
+.slide.s-right  {transform:translateX(100%);opacity:0;pointer-events:none}
+.slide.s-left   {transform:translateX(-28%);opacity:0;pointer-events:none}
+
+/* Container centering */
+.slide-inner{max-width:520px;margin:0 auto;padding-top:32px}
+
+/* ================================================================
+   HERO — Slide 0
+================================================================ */
+.hero{
+  min-height:calc(100dvh - 54px);
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  text-align:center;padding:48px 24px 80px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--g100);border:1px solid var(--g200);border-radius:var(--rpill);
+  padding:5px 13px 5px 9px;font-size:12px;font-weight:600;color:var(--g600);
+  margin-bottom:24px;
+}
+.hero-pulse{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.4)}50%{box-shadow:0 0 0 6px rgba(22,163,74,0)}}
+
+.hero-h{
+  font-size:clamp(2.8rem,9vw,4.2rem);font-weight:900;
+  letter-spacing:-.06em;line-height:1.0;color:var(--b);
+  margin-bottom:16px;
+}
+.hero-h em{font-style:normal;color:var(--g300)}
+.hero-sub{font-size:16px;color:var(--g500);line-height:1.6;max-width:300px;margin:0 auto 36px}
+
+.btn-primary-lg{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--b);color:#fff;border:none;border-radius:var(--rpill);
+  padding:16px 30px;font-size:16px;font-weight:800;cursor:pointer;
+  box-shadow:var(--sh3);
+  transition:transform .14s var(--spring),box-shadow .14s;
+}
+.btn-primary-lg:hover{transform:translateY(-2px);box-shadow:var(--sh4)}
+.btn-primary-lg:active{transform:scale(.97);box-shadow:var(--sh2)}
+
+.hero-note{margin-top:14px;font-size:12px;color:var(--g400)}
+.trust-row{display:flex;gap:16px;justify-content:center;margin-top:32px;flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--g500);font-weight:500}
+
+/* ================================================================
+   SECTION HEADER (no step numbers!)
+================================================================ */
+.sec-q{
+  font-size:clamp(1.55rem,5.5vw,2rem);font-weight:800;
+  letter-spacing:-.04em;line-height:1.2;color:var(--b);
+  margin-bottom:8px;
+}
+.sec-hint{font-size:14px;color:var(--g500);line-height:1.5;margin-bottom:24px}
+
+/* ================================================================
+   INPUTS
+================================================================ */
+.url-wrap{position:relative;margin-bottom:12px}
+.url-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--g400);pointer-events:none}
+.url-in{
+  width:100%;height:52px;padding:0 44px 0 40px;
+  border:1.5px solid var(--g200);border-radius:var(--r12);
+  font-size:14px;color:var(--b);background:var(--w);outline:none;
+  transition:border-color .14s,box-shadow .14s;
+}
+.url-in::placeholder{color:var(--g400)}
+.url-in:focus{border-color:var(--b);box-shadow:0 0 0 3px rgba(9,9,11,.08)}
+.url-clear{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  width:26px;height:26px;background:var(--g100);border:none;border-radius:50%;
+  display:none;place-items:center;cursor:pointer;color:var(--g500);
+  transition:background .12s;
+}
+.url-clear:hover{background:var(--g200)}
+.url-has-val .url-clear{display:grid}
+
+.url-pill{
+  display:none;align-items:center;gap:9px;
+  background:var(--g50);border:1px solid var(--g200);border-radius:var(--r12);
+  padding:10px 13px;margin-bottom:12px;
+}
+.url-pill.show{display:flex}
+.url-fav{
+  width:22px;height:22px;border-radius:6px;background:var(--g100);
+  display:grid;place-items:center;font-size:13px;flex-shrink:0;overflow:hidden;
+}
+.url-domain{font-size:12px;font-weight:700;color:var(--b)}
+.url-path{font-size:11px;color:var(--g400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.url-go{background:none;border:none;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;padding:0 4px;white-space:nowrap}
+
+.field-lbl{font-size:12px;font-weight:700;color:var(--g700);margin-bottom:5px;display:block;letter-spacing:.01em}
+.field-opt{font-size:11px;color:var(--g400);font-weight:500}
+.lbl-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+
+.txt-in{
+  width:100%;height:46px;padding:0 13px;
+  border:1.5px solid var(--g200);border-radius:var(--r8);
+  font-size:14px;color:var(--b);background:var(--w);outline:none;
+  transition:border-color .14s,box-shadow .14s;
+}
+.txt-in::placeholder{color:var(--g400)}
+.txt-in:focus{border-color:var(--b);box-shadow:0 0 0 3px rgba(9,9,11,.08)}
+
+.ig{margin-bottom:13px}
+.ig2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
+
+/* ================================================================
+   CAT + SIZE CHIPS
+================================================================ */
+.chip-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.chip{
+  padding:8px 16px;border-radius:var(--rpill);
+  border:1.5px solid var(--g200);background:var(--w);
+  font-size:13px;font-weight:600;color:var(--g600);
+  cursor:pointer;user-select:none;transition:all .12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.chip:hover{border-color:var(--g400);color:var(--b)}
+.chip:active{transform:scale(.95)}
+.chip.on{background:var(--b);border-color:var(--b);color:#fff}
+
+.sz-add-row{display:flex;gap:7px;margin-top:8px}
+.sz-add-in{
+  flex:1;height:38px;padding:0 13px;border:1.5px solid var(--g200);
+  border-radius:var(--rpill);font-size:13px;outline:none;
+  transition:border-color .14s;background:var(--w);
+}
+.sz-add-in:focus{border-color:var(--b)}
+.sz-add-btn{
+  height:38px;padding:0 14px;background:var(--g100);
+  border:1.5px solid var(--g200);border-radius:var(--rpill);
+  font-size:13px;font-weight:700;cursor:pointer;color:var(--g700);
+  transition:all .12s;white-space:nowrap;
+}
+.sz-add-btn:hover{border-color:var(--g400);background:var(--g150)}
+
+/* ================================================================
+   WARDROBE ANCHOR LIST — Slide 2
+================================================================ */
+.anchor-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+
+.anchor-card{
+  display:flex;align-items:center;gap:12px;padding:14px;
+  border:1.5px solid var(--g200);border-radius:var(--r16);
+  background:var(--g50);cursor:pointer;position:relative;
+  transition:border-color .14s,background .14s,box-shadow .14s;
+  -webkit-tap-highlight-color:transparent;
+}
+.anchor-card:hover{border-color:var(--g400);background:var(--w)}
+.anchor-card.sel{border-color:var(--b);background:var(--w);box-shadow:0 0 0 1px var(--b)}
+
+.a-radio{
+  width:20px;height:20px;border-radius:50%;border:2px solid var(--g300);
+  display:grid;place-items:center;flex-shrink:0;transition:all .14s;
+}
+.anchor-card.sel .a-radio{background:var(--b);border-color:var(--b)}
+.a-chk{display:none}
+.anchor-card.sel .a-chk{display:block}
+
+.a-info{flex:1;min-width:0}
+.a-brand{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.05em}
+.a-name{font-size:14px;font-weight:700;color:var(--b);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-meta{font-size:11px;color:var(--g500);margin-top:1px}
+
+.a-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.a-size{
+  font-size:12px;font-weight:800;padding:4px 9px;
+  background:var(--g100);color:var(--g700);border-radius:6px;
+  font-variant-numeric:tabular-nums;transition:all .14s;
+}
+.anchor-card.sel .a-size{background:var(--b);color:#fff}
+.ic-btn{
+  width:28px;height:28px;border-radius:var(--r8);border:none;
+  background:transparent;cursor:pointer;color:var(--g400);
+  display:grid;place-items:center;transition:all .14s;
+}
+.ic-btn:hover{background:var(--g100);color:var(--b)}
+.ic-btn.del:hover{background:var(--g50r);color:var(--red)}
+
+.add-anchor-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px;border:1.5px dashed var(--g300);
+  border-radius:var(--r16);background:none;cursor:pointer;
+  font-size:14px;font-weight:600;color:var(--g500);
+  transition:all .14s;
+}
+.add-anchor-btn:hover{border-color:var(--b);color:var(--b);background:var(--g50)}
+
+.empty-closet{
+  text-align:center;padding:24px 0;
+}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.empty-t{font-size:15px;font-weight:700;color:var(--g700);margin-bottom:5px}
+.empty-s{font-size:13px;color:var(--g500)}
+
+/* ================================================================
+   PREFERENCE — Slide 3
+================================================================ */
+.pref-list{display:flex;flex-direction:column;gap:10px}
+.pref-card{
+  display:flex;align-items:flex-start;gap:14px;padding:18px 16px;
+  border:1.5px solid var(--g200);border-radius:var(--r16);
+  background:var(--g50);cursor:pointer;
+  transition:all .14s; -webkit-tap-highlight-color:transparent;
+}
+.pref-card:hover{border-color:var(--g400);background:var(--w)}
+.pref-card.sel{border-color:var(--b);background:var(--w);box-shadow:0 0 0 1px var(--b)}
+.p-radio{
+  width:20px;height:20px;border-radius:50%;border:2px solid var(--g300);
+  flex-shrink:0;margin-top:2px;display:grid;place-items:center;
+  transition:all .14s;
+}
+.pref-card.sel .p-radio{background:var(--b);border-color:var(--b)}
+.p-dot{width:8px;height:8px;border-radius:50%;background:#fff;display:none}
+.pref-card.sel .p-dot{display:block}
+.p-title{font-size:15px;font-weight:800;color:var(--b);margin-bottom:4px}
+.p-desc{font-size:13px;color:var(--g500);line-height:1.45}
+
+/* ================================================================
+   RESULT — Slide 4
+================================================================ */
+.res-card{
+  background:var(--w);border:1px solid var(--g200);
+  border-radius:var(--r28);box-shadow:var(--sh3);overflow:hidden;
+  margin-bottom:12px;
+}
+
+.res-top{padding:26px 24px 22px;border-bottom:1px solid var(--g100)}
+
+.res-confirm{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--g50g);border:1px solid var(--g200g);border-radius:var(--rpill);
+  padding:5px 12px;font-size:12px;font-weight:700;color:var(--green);
+  margin-bottom:16px;
+}
+.res-dot{width:6px;height:6px;background:var(--green);border-radius:50%}
+
+.res-size-row{display:flex;align-items:flex-end;gap:14px;margin-bottom:12px}
+.res-sz{
+  font-size:clamp(3.8rem,14vw,5.5rem);font-weight:900;
+  letter-spacing:-.05em;line-height:1;color:var(--b);
+}
+.res-match{
+  display:flex;flex-direction:column;align-items:center;
+  background:var(--g50g);border:1px solid var(--g200g);
+  border-radius:var(--r12);padding:8px 13px;margin-bottom:6px;
+}
+.res-pct{font-size:20px;font-weight:900;color:var(--green);line-height:1}
+.res-pct-l{font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+
+.res-verdict{font-size:16px;color:var(--g600);line-height:1.55}
+.res-verdict strong{color:var(--b);font-weight:700}
+.res-anchor{
+  display:inline-flex;align-items:center;gap:5px;margin-top:10px;
+  background:var(--g100);border-radius:var(--rpill);
+  padding:4px 10px;font-size:12px;color:var(--g600);font-weight:600;
+}
+
+/* Breakdown */
+.bk{padding:18px 24px}
+.bk-head{font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.bk-row{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:11px 0;border-bottom:1px solid var(--g100);
+}
+.bk-row:last-child{border-bottom:none}
+.bk-left{flex:1}
+.bk-zone{font-size:14px;font-weight:700;color:var(--b)}
+.bk-asmt{font-size:13px;color:var(--g500);font-weight:500}
+.bk-note{font-size:12px;color:var(--g400);margin-top:3px;line-height:1.4}
+.bk-delta{
+  font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;
+  white-space:nowrap;margin-left:12px;flex-shrink:0;
+  font-variant-numeric:tabular-nums;
+}
+.dn{background:var(--g100);color:var(--g700)}
+.dp{background:var(--g50g);color:var(--green)}
+.dm{background:var(--g50a);color:var(--amber)}
+.dr{background:var(--g50r);color:var(--red)}
+
+/* Risk strip */
+.risk-strip{
+  margin:0 24px 18px;display:flex;align-items:center;justify-content:space-between;
+  background:var(--g50);border:1px solid var(--g200);border-radius:var(--r12);padding:12px 15px;
+}
+.risk-lbl{font-size:13px;color:var(--g600);display:flex;align-items:center;gap:8px}
+.risk-base{font-size:12px;color:var(--g400);text-decoration:line-through}
+.risk-val{font-size:16px;font-weight:900;color:var(--green)}
+
+/* Product link */
+.prod-link{
+  margin:0 24px 18px;display:flex;align-items:center;gap:11px;
+  background:var(--g50b);border:1px solid #bfdbfe;border-radius:var(--r12);padding:13px 15px;
+}
+.prod-link-txt{flex:1;font-size:13px;color:var(--g600)}
+.prod-link-txt strong{color:var(--b);font-weight:700;display:block;margin-bottom:1px}
+.order-btn{
+  padding:9px 15px;background:var(--b);color:#fff;border:none;border-radius:var(--rpill);
+  font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;transition:opacity .14s;
+}
+.order-btn:hover{opacity:.88}
+
+/* CTAs */
+.res-ctas{padding:0 24px 24px;display:flex;flex-direction:column;gap:8px}
+.btn-main{
+  width:100%;padding:16px;background:var(--b);color:#fff;border:none;
+  border-radius:var(--rpill);font-size:16px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:opacity .14s,transform .12s;
+}
+.btn-main:hover{opacity:.9}
+.btn-main:active{transform:scale(.98)}
+.btn-ghost{
+  width:100%;padding:13px;background:var(--w);color:var(--b);
+  border:1.5px solid var(--g200);border-radius:var(--rpill);
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:border-color .14s,background .14s;
+}
+.btn-ghost:hover{border-color:var(--g400);background:var(--g50)}
+
+/* ================================================================
+   WARDROBE PAGE — Slide 5
+================================================================ */
+.wrd-hdr{display:flex;align-items:flex-start;justify-content:space-between;padding-top:0;margin-bottom:20px}
+.wrd-t{font-size:22px;font-weight:800;letter-spacing:-.04em}
+.wrd-ct{font-size:13px;color:var(--g500);margin-top:2px}
+.btn-sm{
+  display:inline-flex;align-items:center;gap:6px;
+  height:36px;padding:0 14px;background:var(--b);color:#fff;
+  border:none;border-radius:var(--rpill);font-size:13px;font-weight:700;cursor:pointer;
+  transition:opacity .14s;flex-shrink:0;
+}
+.btn-sm:hover{opacity:.88}
+
+.filter-row{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{
+  height:32px;padding:0 14px;border-radius:var(--rpill);
+  border:1.5px solid var(--g200);background:var(--w);
+  font-size:13px;font-weight:600;color:var(--g600);cursor:pointer;white-space:nowrap;
+  transition:all .12s;
+}
+.filter-chip:hover{border-color:var(--g400);color:var(--b)}
+.filter-chip.on{background:var(--b);border-color:var(--b);color:#fff}
+
+.wrd-list{display:flex;flex-direction:column;gap:8px}
+.wrd-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--w);border:1px solid var(--g200);border-radius:var(--r16);
+  padding:14px;box-shadow:var(--sh1);
+  transition:transform .2s var(--spring),opacity .2s;
+}
+.wrd-item.removing{transform:translateX(32px);opacity:0}
+.wrd-cat-icon{
+  width:38px;height:38px;border-radius:var(--r8);background:var(--g100);
+  display:grid;place-items:center;font-size:18px;flex-shrink:0;
+}
+.wrd-info{flex:1;min-width:0}
+.wrd-brand{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.05em}
+.wrd-name{font-size:14px;font-weight:700;color:var(--b)}
+.wrd-meta{font-size:12px;color:var(--g500);margin-top:1px}
+.wrd-acts{display:flex;gap:2px;flex-shrink:0}
+
+.wrd-empty{text-align:center;padding:40px 0}
+
+/* ================================================================
+   BOTTOM CONTINUE BAR — floats above content
+================================================================ */
+.btm-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:70;
+  background:rgba(255,255,255,.9);
+  backdrop-filter:blur(20px) saturate(180%);
+  border-top:1px solid var(--g200);
+  padding:10px 16px max(16px,env(safe-area-inset-bottom));
+  display:none;
+}
+.btm-bar.show{display:block}
+.btm-inner{max-width:520px;margin:0 auto;display:flex;gap:8px}
+
+.btn-back{
+  height:52px;width:52px;background:var(--g100);border:none;border-radius:50%;
+  cursor:pointer;color:var(--g600);display:grid;place-items:center;flex-shrink:0;
+  transition:background .14s,color .14s;
+}
+.btn-back:hover{background:var(--g200);color:var(--b)}
+.btn-continue{
+  flex:1;height:52px;background:var(--b);color:#fff;border:none;
+  border-radius:var(--rpill);font-size:15px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:opacity .14s,transform .12s;
+}
+.btn-continue:hover{opacity:.9}
+.btn-continue:active{transform:scale(.98)}
+.btn-continue:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.spinner{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ================================================================
+   MODAL SHEET
+================================================================ */
+.modal-bg{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.42);backdrop-filter:blur(8px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;transition:opacity .25s;pointer-events:none;
+}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--w);width:100%;border-radius:24px 24px 0 0;
+  max-height:92dvh;overflow-y:auto;
+  padding:0 20px max(24px,env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .34s cubic-bezier(.32,0,.67,0);
+  overscroll-behavior:contain;
+}
+.modal-bg.open .modal{transform:translateY(0)}
+@media(min-width:580px){
+  .modal-bg{align-items:center}
+  .modal{border-radius:var(--r28);max-width:440px;max-height:90dvh;padding:0 28px 28px;transform:scale(.94) translateY(12px)}
+  .modal-bg.open .modal{transform:scale(1) translateY(0)}
+}
+.modal-handle{width:36px;height:4px;background:var(--g200);border-radius:var(--rpill);margin:14px auto 22px}
+.modal-t{font-size:20px;font-weight:800;letter-spacing:-.04em;margin-bottom:4px}
+.modal-s{font-size:13px;color:var(--g500);margin-bottom:20px;line-height:1.4}
+.modal-in{
+  width:100%;height:46px;padding:0 13px;
+  border:1.5px solid var(--g200);border-radius:var(--r8);
+  font-size:15px;color:var(--b);outline:none;background:var(--w);
+  transition:border-color .14s,box-shadow .14s;
+}
+.modal-in:focus{border-color:var(--b);box-shadow:0 0 0 3px rgba(9,9,11,.08)}
+.modal-sel{
+  width:100%;height:46px;padding:0 13px;
+  border:1.5px solid var(--g200);border-radius:var(--r8);
+  font-size:15px;color:var(--b);outline:none;background:var(--w);
+  -webkit-appearance:none;cursor:pointer;transition:border-color .14s;
+}
+.modal-sel:focus{border-color:var(--b)}
+.m2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.mf{margin-bottom:14px}
+.m-acts{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.m-save{
+  width:100%;height:52px;background:var(--b);color:#fff;border:none;
+  border-radius:var(--rpill);font-size:16px;font-weight:800;cursor:pointer;transition:opacity .14s;
+}
+.m-save:hover{opacity:.9}
+.m-cancel{
+  width:100%;height:46px;background:transparent;color:var(--g500);
+  border:1.5px solid var(--g200);border-radius:var(--rpill);
+  font-size:14px;font-weight:600;cursor:pointer;transition:all .14s;
+}
+.m-cancel:hover{color:var(--b);border-color:var(--g400)}
+
+/* ================================================================
+   SNACKBAR
+================================================================ */
+.snack{
+  position:fixed;bottom:80px;left:50%;z-index:300;
+  transform:translateX(-50%) translateY(10px);
+  background:var(--g900);color:#fff;
+  padding:11px 16px 11px 14px;border-radius:var(--rpill);
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:500;box-shadow:var(--sh4);
+  opacity:0;transition:all .2s var(--ea);pointer-events:none;white-space:nowrap;
+}
+.snack.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all}
+.snack-undo{
+  background:rgba(255,255,255,.18);border:none;color:#fff;
+  padding:4px 11px;border-radius:var(--rpill);font-size:12px;font-weight:700;
+  cursor:pointer;transition:background .12s;
+}
+.snack-undo:hover{background:rgba(255,255,255,.3)}
+
+
+/* ================================================================
+   MISC
+================================================================ */
+@keyframes shakex{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.shake{animation:shakex .3s ease}
+.dimmer{color:var(--g500)}
+
+@media(prefers-reduced-motion:reduce){
+  .slide{transition:none}
+  .btn-primary-lg,.btn-continue{transition:none}
+}
+/* ================================================================
+   AI LOOKUP COMPONENTS
+================================================================ */
+.ai-lookup-status{
+  display:flex; align-items:center; gap:14px;
+  padding:16px 18px; background:var(--g100); border-radius:var(--r12);
+  margin-top:18px;
+}
+.ai-lookup-spinner{
+  width:20px; height:20px; border:2.5px solid var(--g200);
+  border-top-color:var(--b); border-radius:50%;
+  animation:aispin .7s linear infinite; flex-shrink:0;
+}
+@keyframes aispin{to{transform:rotate(360deg)}}
+.ai-lookup-title{font-size:13px; font-weight:600; color:var(--b)}
+.ai-lookup-sub{font-size:11.5px; color:var(--g500); margin-top:2px}
+
+.ai-product-card{
+  margin-top:18px; padding:18px 20px; background:var(--w);
+  border:1px solid var(--g200); border-radius:var(--r12);
+  animation:fadeSlideUp .35s var(--ea) both;
+}
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ai-product-header{display:flex; justify-content:space-between; align-items:flex-start; gap:12px}
+.ai-product-brand{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--g500)}
+.ai-product-name{font-size:15px; font-weight:600; color:var(--b); margin-top:2px}
+.ai-product-meta{display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0}
+.ai-product-cat{
+  font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.04em;
+  padding:3px 8px; border-radius:var(--rpill); background:var(--g100); color:var(--g600);
+}
+.ai-product-price{font-size:12.5px; font-weight:600; color:var(--b)}
+.ai-product-sizes{
+  display:flex; flex-wrap:wrap; gap:6px; margin-top:14px;
+}
+.ai-product-sizes .sz-tag{
+  font-size:11.5px; font-weight:500; padding:4px 10px;
+  border-radius:var(--rpill); background:var(--g100); color:var(--g700);
+}
+.ai-product-fit{font-size:11.5px; color:var(--g500); margin-top:10px}
+
+.manual-toggle{
+  display:block; width:100%; margin-top:16px; padding:10px;
+  background:none; border:none; color:var(--g400);
+  font-size:12px; font-weight:500; cursor:pointer;
+  transition:color .15s;
+}
+.manual-toggle:hover{color:var(--b)}
+
+/* API Key Settings */
+.settings-overlay{
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,.45); backdrop-filter:blur(8px);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .25s var(--ea); pointer-events:none;
+}
+.settings-overlay.open{opacity:1; pointer-events:auto}
+.settings-card{
+  background:var(--w); border-radius:var(--r16); padding:32px 28px;
+  width:min(420px, calc(100vw - 40px)); box-shadow:var(--sh4);
+  transform:translateY(12px) scale(.97); transition:transform .3s var(--spring);
+}
+.settings-overlay.open .settings-card{transform:none}
+.settings-title{font-size:16px; font-weight:700; color:var(--b)}
+.settings-desc{font-size:13px; color:var(--g500); margin-top:6px; line-height:1.5}
+.settings-label{display:block; font-size:12px; font-weight:600; color:var(--g600); margin-top:20px; margin-bottom:6px}
+.settings-input{
+  width:100%; padding:10px 14px; border:1px solid var(--g200); border-radius:var(--r8);
+  font-size:14px; outline:none; transition:border-color .15s;
+}
+.settings-input:focus{border-color:var(--b)}
+.settings-input::placeholder{color:var(--g400)}
+.settings-actions{display:flex; gap:10px; margin-top:22px; justify-content:flex-end}
+.settings-btn{
+  padding:9px 20px; border-radius:var(--r8); font-size:13px; font-weight:600;
+  border:none; cursor:pointer; transition:all .15s;
+}
+.settings-btn-primary{background:var(--b); color:var(--w)}
+.settings-btn-primary:hover{background:var(--g800)}
+.settings-btn-ghost{background:none; color:var(--g500)}
+.settings-btn-ghost:hover{color:var(--b)}
+.settings-error{font-size:12px; color:var(--red); margin-top:8px; display:none}
+.settings-ok{font-size:12px; color:var(--green); margin-top:8px; display:none}
+
+/* Settings gear in nav */
+.btn-settings{
+  display:flex; align-items:center; gap:5px;
+  padding:6px 10px; border:1px solid var(--g200); border-radius:var(--rpill);
+  background:var(--w); font-size:11.5px; font-weight:500; color:var(--g600);
+  cursor:pointer; transition:all .15s;
+}
+.btn-settings:hover{border-color:var(--g400); color:var(--b)}
+
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand" id="brandLink">
+      <div class="brand-mark">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">AnthroFit</div>
+        <div class="brand-sub">Size Intelligence</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <button class="btn-wardrobe" id="wardrobeNavBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+          <line x1="3" x2="21" y1="6" y2="6"/>
+        </svg>
+        Wardrobe
+        <span class="w-count" id="wCount">0</span>
+      </button>
+      <button class="btn-settings" id="settingsNavBtn" onclick="openSettings()" title="API Key Settings">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- API Key Settings Modal -->
+<div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-card">
+    <div class="settings-title">Settings</div>
+    <div class="settings-desc">Enter your Google AI Studio API key to enable intelligent product search. Your key is stored locally and never sent to our servers.</div>
+    <label class="settings-label">API Key</label>
+    <input class="settings-input" id="apiKeyInput" type="password" placeholder="AIza..." autocomplete="off">
+    <div class="settings-error" id="settingsError"></div>
+    <div class="settings-ok" id="settingsOk">Key saved successfully</div>
+    <div class="settings-actions">
+      <button class="settings-btn settings-btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="settings-btn settings-btn-primary" onclick="saveApiKey()">Save Key</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ FLOW ══════ -->
+<div class="flow" id="flow">
+
+  <!-- SLIDE 0: HOME -->
+  <div class="slide s-current" id="s0">
+    <div class="hero">
+      <div class="hero-badge">
+        <span class="hero-pulse"></span>
+        No measuring tape. No guessing.
+      </div>
+      <h1 class="hero-h">What size<br>should you<br><em>actually</em> get?</h1>
+      <p class="hero-sub">Just tell us what you want to buy. We'll search the product, find the sizes, and tell you exactly which one to get.</p>
+      <button class="btn-primary-lg" id="startBtn">
+        Find My Size
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <p class="hero-note">Takes about 30 seconds &nbsp;·&nbsp; Searches real sizing charts</p>
+      <div class="trust-row">
+        <span class="trust-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Any brand worldwide</span>
+        <span class="trust-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Real manufacturer data</span>
+        <span class="trust-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Physics-based engine</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: PRODUCT SEARCH -->
+  <div class="slide s-right" id="s1">
+    <div class="slide-inner">
+      <h2 class="sec-q">What are you trying to buy?</h2>
+      <p class="sec-hint">Type the product name and brand. We'll look up the exact sizing chart for you.</p>
+
+      <!-- Search -->
+      <div class="ig">
+        <span class="field-lbl">Product Search</span>
+        <div class="url-wrap" id="searchWrap">
+          <span class="url-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input class="url-in" type="text" id="searchIn" placeholder="Nike Club Fleece Hoodie, Uniqlo AIRism T-Shirt..." autocomplete="off" autocorrect="off">
+        </div>
+      </div>
+
+      <!-- URL (optional) -->
+      <div class="ig">
+        <div class="lbl-row"><span class="field-lbl">Product Link</span><span class="field-opt">Optional</span></div>
+        <div class="url-wrap" id="urlWrap">
+          <span class="url-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+          </span>
+          <input class="url-in" type="url" id="urlIn" placeholder="https://cos.com/en_gbp/men/..." autocomplete="off" autocorrect="off" autocapitalize="off" oninput="onUrl(this)">
+          <button class="url-clear" id="urlClear" onclick="clearUrl()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="url-pill" id="urlPill">
+          <div class="url-fav" id="urlFav">*</div>
+          <div style="flex:1;min-width:0">
+            <div class="url-domain" id="urlDomain">--</div>
+            <div class="url-path" id="urlPath">--</div>
+          </div>
+          <button class="url-go" onclick="openUrl()">Open</button>
+        </div>
+      </div>
+
+      <!-- AI Lookup Status (hidden by default) -->
+      <div class="ai-lookup-status" id="aiStatus" style="display:none">
+        <div class="ai-lookup-spinner"></div>
+        <div class="ai-lookup-text">
+          <div class="ai-lookup-title" id="aiStatusTitle">Searching product database...</div>
+          <div class="ai-lookup-sub" id="aiStatusSub">Looking up sizing charts</div>
+        </div>
+      </div>
+
+      <!-- AI Result Preview (shown after successful lookup) -->
+      <div class="ai-product-card" id="aiProductCard" style="display:none">
+        <div class="ai-product-header">
+          <div>
+            <div class="ai-product-brand" id="aiProductBrand"></div>
+            <div class="ai-product-name" id="aiProductName"></div>
+          </div>
+          <div class="ai-product-meta">
+            <span class="ai-product-cat" id="aiProductCat"></span>
+            <span class="ai-product-price" id="aiProductPrice"></span>
+          </div>
+        </div>
+        <div class="ai-product-sizes" id="aiProductSizes"></div>
+        <div class="ai-product-fit" id="aiProductFit"></div>
+      </div>
+
+      <!-- Fallback manual fields (hidden behind "Enter manually" toggle) -->
+      <div id="manualFields" style="display:none">
+        <div class="ig2">
+          <div><span class="field-lbl">Brand</span><input class="txt-in" type="text" id="pBrand" placeholder="COS, Zara, Nike..." autocomplete="off"></div>
+          <div><span class="field-lbl">Item Name</span><input class="txt-in" type="text" id="pName" placeholder="Heavyweight Tee..." autocomplete="off"></div>
+        </div>
+        <div class="ig">
+          <span class="field-lbl">Category</span>
+          <div class="chip-row" id="catChips">
+            <div class="chip on" data-cat="tops">Tops</div>
+            <div class="chip" data-cat="bottoms">Bottoms</div>
+            <div class="chip" data-cat="outerwear">Outerwear</div>
+            <div class="chip" data-cat="knitwear">Knitwear</div>
+          </div>
+        </div>
+      </div>
+      <button class="manual-toggle" id="manualToggle" onclick="toggleManual()">Enter details manually instead</button>
+    </div>
+  </div>
+
+  <!-- SLIDE 1b: SIZES -->
+  <div class="slide s-right" id="s1b">
+    <div class="slide-inner">
+      <h2 class="sec-q">What sizes does it come in?</h2>
+      <p class="sec-hint">Tap the sizes this product offers. We'll work out which one fits you best.</p>
+      <div class="chip-row" id="sizeChips">
+        <div class="chip" data-sz="XS">XS</div>
+        <div class="chip on" data-sz="S">S</div>
+        <div class="chip on" data-sz="M">M</div>
+        <div class="chip on" data-sz="L">L</div>
+        <div class="chip" data-sz="XL">XL</div>
+        <div class="chip" data-sz="XXL">XXL</div>
+      </div>
+      <div class="sz-add-row">
+        <input class="sz-add-in" id="szAddIn" type="text" placeholder="Other sizes (29, 32×32, …)" autocomplete="off">
+        <button class="sz-add-btn" onclick="addSz()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: ANCHOR -->
+  <div class="slide s-right" id="s2">
+    <div class="slide-inner">
+      <h2 class="sec-q">Which piece fits you perfectly?</h2>
+      <p class="sec-hint">Pick a garment you already own and love the fit of. We'll use its cut pattern as a reference.</p>
+      <div class="anchor-list" id="anchorList"></div>
+      <button class="add-anchor-btn" id="addAnchorBtn" onclick="openModal(null)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add a garment from my wardrobe
+      </button>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: PREFERENCE -->
+  <div class="slide s-right" id="s3">
+    <div class="slide-inner">
+      <h2 class="sec-q">How should this piece feel on?</h2>
+      <p class="sec-hint">This shifts the tolerance calculation to match your preferred drape.</p>
+      <div class="pref-list">
+        <div class="pref-card" data-pref="fitted" onclick="selPref(this)">
+          <div class="p-radio"><div class="p-dot"></div></div>
+          <div>
+            <div class="p-title">Sharp & Fitted</div>
+            <div class="p-desc">Close to the body. Structured, tailored silhouette. Best for formal or office wear.</div>
+          </div>
+        </div>
+        <div class="pref-card sel" data-pref="true_to_anchor" onclick="selPref(this)">
+          <div class="p-radio"><div class="p-dot"></div></div>
+          <div>
+            <div class="p-title">True to My Anchor</div>
+            <div class="p-desc">Exactly the same volume and drape as the garment you picked — the most accurate result.</div>
+          </div>
+        </div>
+        <div class="pref-card" data-pref="relaxed" onclick="selPref(this)">
+          <div class="p-radio"><div class="p-dot"></div></div>
+          <div>
+            <div class="p-title">Relaxed & Oversized</div>
+            <div class="p-desc">Extra ease throughout. For layering, streetwear, or a deliberately loose silhouette.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: RESULT -->
+  <div class="slide s-right" id="s4">
+    <div class="slide-inner" style="padding-bottom:24px">
+      <div class="res-card" id="resCard"></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: WARDROBE -->
+  <div class="slide s-right" id="s5">
+    <div class="slide-inner">
+      <div class="wrd-hdr">
+        <div>
+          <div class="wrd-t">My Wardrobe</div>
+          <div class="wrd-ct" id="wrdCount">0 saved pieces</div>
+        </div>
+        <button class="btn-sm" onclick="openModal(null)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add
+        </button>
+      </div>
+      <div class="filter-row" id="filterRow">
+        <button class="filter-chip on" data-f="all" onclick="doFilter('all',this)">All</button>
+        <button class="filter-chip" data-f="tops" onclick="doFilter('tops',this)">Tops</button>
+        <button class="filter-chip" data-f="bottoms" onclick="doFilter('bottoms',this)">Bottoms</button>
+        <button class="filter-chip" data-f="outerwear" onclick="doFilter('outerwear',this)">Outerwear</button>
+        <button class="filter-chip" data-f="knitwear" onclick="doFilter('knitwear',this)">Knitwear</button>
+      </div>
+      <div class="wrd-list" id="wrdList"></div>
+      <div class="wrd-empty" id="wrdEmpty" style="display:none">
+        <div style="font-size:38px;margin-bottom:10px">👕</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px">Your wardrobe is empty</div>
+        <div style="font-size:14px;color:var(--g500);margin-bottom:18px">Add garments that fit you well to use as sizing anchors.</div>
+        <button class="btn-sm" onclick="openModal(null)">Add your first piece</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /flow -->
+
+<!-- ── BOTTOM BAR ── -->
+<div class="btm-bar" id="btmBar">
+  <div class="btm-inner">
+    <button class="btn-back" id="btnBack" onclick="goBack()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <button class="btn-continue" id="btnCont" onclick="goNext()">
+      <span id="contLabel">Continue</span>
+      <svg id="contArrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-bg" id="modalBg" onclick="bgClick(event)">
+  <div class="modal" id="modalEl">
+    <div class="modal-handle"></div>
+    <div class="modal-t" id="mTitle">Add Garment</div>
+    <div class="modal-s" id="mSub">A piece from your wardrobe that fits you well.</div>
+    <div class="m2">
+      <div class="mf"><label class="field-lbl" for="mBrand">Brand</label><input class="modal-in" type="text" id="mBrand" placeholder="Uniqlo"></div>
+      <div class="mf"><label class="field-lbl" for="mSz">Tag Size</label><input class="modal-in" type="text" id="mSz" placeholder="M or 32×32"></div>
+    </div>
+    <div class="mf"><label class="field-lbl" for="mModel">Item Name</label><input class="modal-in" type="text" id="mModel" placeholder="AIRism Oversized T-Shirt"></div>
+    <div class="m2">
+      <div class="mf"><label class="field-lbl" for="mCat">Category</label>
+        <select class="modal-sel" id="mCat">
+          <option value="tops">Tops / Shirts</option>
+          <option value="bottoms">Bottoms / Denim</option>
+          <option value="outerwear">Outerwear</option>
+          <option value="knitwear">Knitwear</option>
+        </select>
+      </div>
+      <div class="mf"><label class="field-lbl" for="mColor">Colour</label><input class="modal-in" type="text" id="mColor" placeholder="Black"></div>
+    </div>
+    <div class="mf"><label class="field-lbl" for="mFit">How it fits you</label>
+      <select class="modal-sel" id="mFit">
+        <option value="perfect">Perfect — how I like it</option>
+        <option value="slightly_tight">Slightly tight on me</option>
+        <option value="slightly_loose">Slightly loose on me</option>
+      </select>
+    </div>
+    <div class="m-acts">
+      <button class="m-save" id="mSave" onclick="saveModal()">Save to Wardrobe</button>
+      <button class="m-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SNACK ── -->
+<div class="snack" id="snack">
+  <span id="snackTxt">Removed</span>
+  <button class="snack-undo" onclick="undoDel()">Undo</button>
+</div>
+
+
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════
+//  CONSTANTS & SEED DATA
+// ══════════════════════════════════════════════════
+const LS = 'af_wardrobe_v3';
+
+const CAT_ICONS = {tops:'👕',bottoms:'👖',outerwear:'🧥',knitwear:'🧶'};
+const CAT_LABELS= {tops:'Tops & Shirts',bottoms:'Bottoms',outerwear:'Outerwear',knitwear:'Knitwear'};
+
+const SEED_CLOSET = [
+  {id:'s1',brand:'Uniqlo',model:'AIRism Oversized Crew Tee',size:'M',cat:'tops',color:'Black',fit:'perfect',_builtin:'ANCHOR-UNIQLO-AIRISM-M'},
+  {id:'s2',brand:'Uniqlo',model:'AIRism Oversized Crew Tee',size:'L',cat:'tops',color:'White',fit:'perfect',_builtin:'ANCHOR-UNIQLO-AIRISM-L'},
+  {id:'s3',brand:"Levi's",model:'511 Slim Stretch Jeans',size:'32×32',cat:'bottoms',color:'Indigo',fit:'perfect',_builtin:'ANCHOR-LEVIS-511-32'},
+  {id:'s4',brand:'Lululemon',model:'Fundamental Tee',size:'M',cat:'tops',color:'Navy',fit:'perfect',_builtin:'ANCHOR-LULULEMON-FUNDAMENTAL-M'},
+  {id:'s5',brand:'Nike',model:'Club Fleece Hoodie',size:'L',cat:'outerwear',color:'Grey',fit:'perfect',_builtin:'ANCHOR-NIKE-CLUB-FLEECE-L'},
+  {id:'s6',brand:'Arket',model:'Jersey Boxy T-Shirt',size:'M',cat:'tops',color:'Ecru',fit:'perfect',_builtin:'ANCHOR-ARKET-BOXY-M'},
+];
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+let S = {
+  cur: 's0',
+  prev: null,
+  closet: loadCloset(),
+  editId: null,
+  deleted: null,
+  snackTmr: null,
+  filterCat: 'all',
+
+  // flow data
+  pUrl: '',
+  pBrand: '',
+  pName: '',
+  pCat: 'tops',
+  pSizes: ['S','M','L'],
+  anchorId: null,
+  pref: 'true_to_anchor',
+  verdict: null,
+
+  // AI state
+  aiData: null,       // Raw AI lookup response
+  aiDims: null,       // Converted dimensions for engine
+  aiMode: false,      // Whether current match uses AI data
+  aiKeySet: false,    // Whether API key is configured
+};
+
+function loadCloset(){
+  try{const r=localStorage.getItem(LS);if(r)return JSON.parse(r);}catch(e){}
+  return JSON.parse(JSON.stringify(SEED_CLOSET));
+}
+function saveCloset(){localStorage.setItem(LS,JSON.stringify(S.closet));updateCount();}
+
+// ══════════════════════════════════════════════════
+//  SLIDE ROUTING
+// ══════════════════════════════════════════════════
+const SLIDE_ORDER = ['s0','s1','s1b','s2','s3','s4'];
+
+function goTo(id, dir='forward'){
+  const cur = document.getElementById(S.cur);
+  const nxt = document.getElementById(id);
+  if(!nxt) return;
+
+  cur.classList.remove('s-current');
+  nxt.classList.remove('s-right','s-left');
+
+  if(dir === 'forward'){
+    cur.classList.add('s-left');
+    nxt.classList.add('s-current');
+    cur.style.position = 'absolute';
+    nxt.style.position = 'relative';
+  } else {
+    nxt.style.position = 'relative';
+    nxt.classList.add('s-current');
+    cur.classList.add('s-right');
+    cur.style.position = 'absolute';
+  }
+
+  S.prev = S.cur;
+  S.cur  = id;
+  updateBar(id);
+  scrollTo(0,0);
+}
+
+function updateBar(id){
+  const bar = document.getElementById('btmBar');
+  const hidden = ['s0','s4','s5'];
+  if(hidden.includes(id)){ bar.classList.remove('show'); return; }
+  bar.classList.add('show');
+
+  const labels = {s1:'Continue',s1b:'Choose My Reference',s2:'Continue',s3:'Calculate My Size'};
+  document.getElementById('contLabel').textContent = labels[id] || 'Continue';
+}
+
+// ══════════════════════════════════════════════════
+//  NAV WIRING
+// ══════════════════════════════════════════════════
+document.getElementById('brandLink').onclick = () => {
+  ['s1','s1b','s2','s3','s4','s5'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('s-current','s-left');
+    el.classList.add('s-right');
+    el.style.position = 'absolute';
+  });
+  document.getElementById('s0').classList.remove('s-left','s-right');
+  document.getElementById('s0').classList.add('s-current');
+  document.getElementById('s0').style.position = 'relative';
+  S.cur = 's0';
+  document.getElementById('btmBar').classList.remove('show');
+};
+
+document.getElementById('startBtn').onclick = () => {
+  S.anchorId = null; S.verdict = null;
+  goTo('s1');
+};
+
+document.getElementById('wardrobeNavBtn').onclick = () => {
+  if(S.cur === 's5'){
+    goTo(S.prev || 's0', 'back');
+  } else {
+    renderWardrobePage();
+    goTo('s5');
+  }
+};
+
+// ══════════════════════════════════════════════════
+//  SLIDE CONTENT INIT
+// ══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#catChips .chip').forEach(c => {
+    c.onclick = () => {
+      document.querySelectorAll('#catChips .chip').forEach(x=>x.classList.remove('on'));
+      c.classList.add('on');
+      S.pCat = c.dataset.cat;
+    };
+  });
+
+  document.querySelectorAll('#sizeChips .chip').forEach(c => {
+    c.onclick = () => c.classList.toggle('on');
+  });
+
+  updateCount();
+  initAiKey();
+});
+
+// ══════════════════════════════════════════════════
+//  NAV — CONTINUE / BACK
+// ══════════════════════════════════════════════════
+function goNext(){
+  if(S.cur === 's1'){
+    const searchVal = document.getElementById('searchIn')?.value.trim() || '';
+    const manualVisible = document.getElementById('manualFields').style.display !== 'none';
+
+    if(manualVisible){
+      // Manual entry fallback
+      if(!step1Valid()) return;
+      goTo('s1b');
+      return;
+    }
+
+    if(!searchVal){
+      shake('searchIn');
+      document.getElementById('searchIn').focus();
+      return;
+    }
+
+    // If product details already resolved, advance directly to wardrobe anchor selection
+    if(S.aiData && S._lastSearch === searchVal){
+      renderAnchorList();
+      goTo('s2');
+      return;
+    }
+
+    // Run AI / catalog lookup
+    doAiLookup(searchVal);
+    return;
+  } else if(S.cur === 's1b'){
+    S.pSizes = [...document.querySelectorAll('#sizeChips .chip.on')].map(c=>c.dataset.sz);
+    if(!S.pSizes.length){shake('s1b'); return;}
+    renderAnchorList();
+    goTo('s2');
+  } else if(S.cur === 's2'){
+    if(!S.anchorId){shake('anchorList'); showSnack('Please select a reference piece'); return;}
+    goTo('s3');
+  } else if(S.cur === 's3'){
+    compute();
+  }
+}
+
+function goBack(){
+  const order = ['s0','s1','s1b','s2','s3','s4'];
+  const idx = order.indexOf(S.cur);
+  if(idx <= 0){ goTo('s0','back'); return; }
+  goTo(order[idx-1],'back');
+}
+
+// ══════════════════════════════════════════════════
+//  STEP 1 — URL + PRODUCT
+// ══════════════════════════════════════════════════
+const DOMAIN_MAP = {
+  'cos.com':'COS','arket.com':'Arket','zara.com':'Zara','hm.com':'H&M',
+  'uniqlo.com':'Uniqlo','asos.com':'ASOS','acnestudios.com':'Acne Studios',
+  'lululemon.com':'Lululemon','nike.com':'Nike','levis.com':"Levi's",
+  'adidas.com':'Adidas','gap.com':'Gap','stories.com':'&Other Stories',
+  'apc.fr':'A.P.C.','nordstrom.com':'Nordstrom','mrporter.com':'Mr Porter',
+};
+const FAV_EMOJI = {
+  'cos.':'🪡','arket.':'🌿','zara.':'🛍','uniqlo':'🇯🇵','asos.':'👗',
+  'lululemon':'🧘','nike.':'✔','adidas.':'🏃','acne':'🎨','levis':'👖',
+};
+
+function onUrl(el){
+  const v = el.value.trim();
+  const wrap = document.getElementById('urlWrap');
+  const pill = document.getElementById('urlPill');
+  if(!v){ wrap.classList.remove('url-has-val'); pill.classList.remove('show'); S.pUrl=''; return; }
+  wrap.classList.add('url-has-val');
+  try{
+    const url = new URL(v.startsWith('http')?v:'https://'+v);
+    const domain = url.hostname.replace('www.','');
+    document.getElementById('urlDomain').textContent = domain;
+    document.getElementById('urlPath').textContent = url.pathname + (url.search||'');
+    let em = '🌐';
+    for(const [k,e] of Object.entries(FAV_EMOJI)){ if(domain.includes(k)){ em=e; break; } }
+    document.getElementById('urlFav').textContent = em;
+    pill.classList.add('show');
+    S.pUrl = url.href;
+    for(const [k,b] of Object.entries(DOMAIN_MAP)){
+      if(domain.includes(k.replace('www.',''))){
+        const bi = document.getElementById('pBrand');
+        if(!bi.value) bi.value = b;
+        break;
+      }
+    }
+  } catch(e){ pill.classList.remove('show'); S.pUrl=''; }
+}
+function clearUrl(){
+  const el=document.getElementById('urlIn');
+  el.value=''; onUrl(el); el.focus();
+}
+function openUrl(){ if(S.pUrl) window.open(S.pUrl,'_blank'); }
+
+function step1Valid(){
+  const brand = document.getElementById('pBrand').value.trim();
+  const name  = document.getElementById('pName').value.trim();
+  if(!brand){ shake('pBrand'); document.getElementById('pBrand').focus(); return false; }
+  if(!name) { shake('pName');  document.getElementById('pName').focus();  return false; }
+  S.pBrand = brand; S.pName = name;
+  S.pCat = document.querySelector('#catChips .chip.on')?.dataset.cat || 'tops';
+  return true;
+}
+
+function addSz(){
+  const v = document.getElementById('szAddIn').value.trim();
+  if(!v) return;
+  const row = document.getElementById('sizeChips');
+  if([...row.querySelectorAll('.chip')].some(c=>c.dataset.sz===v)) return;
+  const c = document.createElement('div');
+  c.className='chip on'; c.dataset.sz=v; c.textContent=v;
+  c.onclick = () => c.classList.toggle('on');
+  row.appendChild(c);
+  document.getElementById('szAddIn').value='';
+}
+
+// ══════════════════════════════════════════════════
+//  AI PRODUCT LOOKUP
+// ══════════════════════════════════════════════════
+async function doAiLookup(query){
+  // Check if API key is set in localStorage or already active on server via .env
+  if(!S.aiKeySet && !localStorage.getItem('af_api_key')){
+    try{
+      const st = await fetch('/api/status').then(r=>r.json());
+      if(st && st.ai_enabled){
+        S.aiKeySet = true;
+      }
+    } catch(e){}
+  }
+
+  // If no key configured, prompt user to add key
+  if(!S.aiKeySet && !localStorage.getItem('af_api_key')){
+    openSettings();
+    showSnack('Please set your Google AI Studio key first');
+    return null;
+  }
+
+  const url = document.getElementById('urlIn')?.value.trim() || '';
+
+  // Show loading state
+  const statusEl = document.getElementById('aiStatus');
+  const cardEl = document.getElementById('aiProductCard');
+  statusEl.style.display = 'flex';
+  cardEl.style.display = 'none';
+  document.getElementById('aiStatusTitle').textContent = 'Searching for "' + query + '"...';
+  document.getElementById('aiStatusSub').textContent = 'Looking up manufacturer sizing chart';
+
+  // Disable continue button during lookup
+  const contBtn = document.getElementById('btnCont');
+  if(contBtn) contBtn.disabled = true;
+
+  try{
+    const resp = await fetch('/api/ai/lookup', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ query, url })
+    });
+    const data = await resp.json();
+
+    statusEl.style.display = 'none';
+
+    if(data.error){
+      showSnack(data.error);
+      if(contBtn) contBtn.disabled = false;
+      return null;
+    }
+
+    // Store AI data
+    S.aiData = data;
+    S.aiDims = data.ai_dims || null;
+    S.aiMode = true;
+    S._lastSearch = query;
+
+    // Fill state from AI response
+    S.pBrand = data.brand || '';
+    S.pName = data.name || '';
+    S.pCat = data.category || 'tops';
+    S.pSizes = data.available_sizes || [];
+    S.pUrl = data.url || url;
+
+    // Show product card
+    renderAiProductCard(data);
+
+    if(contBtn) contBtn.disabled = false;
+    return data;
+  } catch(e){
+    statusEl.style.display = 'none';
+    showSnack('Search failed. Please check your connection.');
+    if(contBtn) contBtn.disabled = false;
+    return null;
+  }
+}
+
+function renderAiProductCard(data){
+  const card = document.getElementById('aiProductCard');
+  card.style.display = 'block';
+
+  document.getElementById('aiProductBrand').textContent = data.brand || '';
+  document.getElementById('aiProductName').textContent = data.name || '';
+  document.getElementById('aiProductCat').textContent = (data.category || 'tops').replace(/^\w/, c=>c.toUpperCase());
+
+  const priceEl = document.getElementById('aiProductPrice');
+  priceEl.textContent = data.retail_price || '';
+  priceEl.style.display = data.retail_price ? 'block' : 'none';
+
+  // Render size tags
+  const sizesEl = document.getElementById('aiProductSizes');
+  sizesEl.innerHTML = '';
+  (data.available_sizes || []).forEach(sz => {
+    const tag = document.createElement('span');
+    tag.className = 'sz-tag';
+    tag.textContent = sz;
+    sizesEl.appendChild(tag);
+  });
+
+  const fitEl = document.getElementById('aiProductFit');
+  fitEl.textContent = data.fit_notes || '';
+  fitEl.style.display = data.fit_notes ? 'block' : 'none';
+
+  // Update continue button label while preserving arrow icon
+  const contLbl = document.getElementById('contLabel');
+  if(contLbl) contLbl.textContent = 'Continue to Reference Piece';
+}
+
+function toggleManual(){
+  const manualEl = document.getElementById('manualFields');
+  const searchEl = document.getElementById('searchWrap');
+  const toggleBtn = document.getElementById('manualToggle');
+  const aiCard = document.getElementById('aiProductCard');
+  const aiStatus = document.getElementById('aiStatus');
+
+  if(manualEl.style.display === 'none'){
+    manualEl.style.display = 'block';
+    searchEl.style.display = 'none';
+    aiCard.style.display = 'none';
+    aiStatus.style.display = 'none';
+    toggleBtn.textContent = 'Search by product name instead';
+    S.aiMode = false;
+    S.aiData = null;
+    S.aiDims = null;
+  } else {
+    manualEl.style.display = 'none';
+    searchEl.style.display = '';
+    toggleBtn.textContent = 'Enter details manually instead';
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  SETTINGS (API KEY)
+// ══════════════════════════════════════════════════
+function openSettings(){
+  const overlay = document.getElementById('settingsOverlay');
+  const input = document.getElementById('apiKeyInput');
+  const err = document.getElementById('settingsError');
+  const ok = document.getElementById('settingsOk');
+  err.style.display = 'none';
+  ok.style.display = 'none';
+
+  const savedKey = localStorage.getItem('af_api_key') || '';
+  input.value = savedKey ? savedKey.slice(0, 8) + '...' : '';
+
+  overlay.classList.add('open');
+  setTimeout(() => input.focus(), 200);
+}
+
+function closeSettings(){
+  document.getElementById('settingsOverlay').classList.remove('open');
+}
+
+async function saveApiKey(){
+  const input = document.getElementById('apiKeyInput');
+  const err = document.getElementById('settingsError');
+  const ok = document.getElementById('settingsOk');
+  const key = input.value.trim();
+
+  err.style.display = 'none';
+  ok.style.display = 'none';
+
+  if(!key || key.length < 10 || key.includes('...')){
+    err.textContent = 'Please enter a valid API key';
+    err.style.display = 'block';
+    return;
+  }
+
+  try{
+    const resp = await fetch('/api/key', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ key })
+    });
+    const data = await resp.json();
+    if(data.status === 'ok'){
+      localStorage.setItem('af_api_key', key);
+      S.aiKeySet = true;
+      ok.textContent = 'Key saved successfully';
+      ok.style.display = 'block';
+      setTimeout(() => closeSettings(), 800);
+    }
+  } catch(e){
+    err.textContent = 'Failed to save key. Is the server running?';
+    err.style.display = 'block';
+  }
+}
+
+// Auto-send stored key on page load, or check if server has key from .env
+async function initAiKey(){
+  try{
+    const st = await fetch('/api/status').then(r=>r.json());
+    if(st && st.ai_enabled){
+      S.aiKeySet = true;
+      return;
+    }
+  } catch(e){}
+
+  const key = localStorage.getItem('af_api_key');
+  if(key){
+    try{
+      await fetch('/api/key', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ key })
+      });
+      S.aiKeySet = true;
+    } catch(e){}
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  STEP 2 — ANCHOR LIST
+// ══════════════════════════════════════════════════
+function renderAnchorList(){
+  const list = document.getElementById('anchorList');
+  const cat  = S.pCat;
+  const rel  = S.closet.filter(g => g.cat === cat || (cat === 'outerwear' && g.cat === 'tops'));
+  const oth  = S.closet.filter(g => !rel.includes(g));
+  const items= [...rel,...oth];
+
+  if(!items.length){
+    list.innerHTML=`<div class="empty-closet">
+      <div class="empty-icon">👕</div>
+      <div class="empty-t">No garments saved yet</div>
+      <div class="empty-s">Add a piece you own and love the fit of.</div>
+    </div>`; return;
+  }
+
+  list.innerHTML = items.map(g=>`
+    <div class="anchor-card${S.anchorId===g.id?' sel':''}" id="ac-${g.id}" onclick="selAnchor('${g.id}')">
+      <div class="a-radio">
+        <svg class="a-chk" width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5"><polyline points="2 6 5 9 10 3"/></svg>
+      </div>
+      <div class="a-info">
+        <div class="a-brand">${g.brand}</div>
+        <div class="a-name">${g.model}</div>
+        <div class="a-meta">${CAT_LABELS[g.cat]||g.cat}${g.color?' · '+g.color:''}</div>
+      </div>
+      <div class="a-actions">
+        <div class="a-size">${g.size}</div>
+        <button class="ic-btn" onclick="event.stopPropagation();openModal('${g.id}')" title="Edit">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selAnchor(id){
+  S.anchorId = id;
+  document.querySelectorAll('.anchor-card').forEach(c=>c.classList.remove('sel'));
+  const el = document.getElementById('ac-'+id);
+  if(el) el.classList.add('sel');
+}
+
+// ══════════════════════════════════════════════════
+//  STEP 3 — PREFERENCE
+// ══════════════════════════════════════════════════
+function selPref(el){
+  document.querySelectorAll('.pref-card').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
+  S.pref = el.dataset.pref;
+}
+
+// ══════════════════════════════════════════════════
+//  COMPUTE — calls real backend API
+// ══════════════════════════════════════════════════
+async function compute(){
+  const btn = document.getElementById('btnCont');
+  btn.disabled=true;
+  btn.innerHTML='<div class="spinner"></div>';
+  await sleep(100);
+
+  const garm = S.closet.find(g=>g.id===S.anchorId);
+  const anchorApiId = garm?._builtin || null;
+
+  let result = null;
+  try{
+    const body = {
+      anchor_id: anchorApiId || `USER-${S.anchorId}`,
+      product_brand: S.pBrand,
+      product_name:  S.pName,
+      product_category: S.pCat,
+      product_sizes:    S.pSizes,
+      product_url:      S.pUrl || null,
+      fit_preference:   S.pref,
+    };
+
+    // Pass AI-sourced real measurements if available
+    if(S.aiMode && S.aiDims && Object.keys(S.aiDims).length > 0){
+      body.ai_size_dims = S.aiDims;
+    }
+
+    if(!anchorApiId && garm){
+      try{
+        const addRes = await fetch('/api/catalog/anchors/add',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            brand:garm.brand,model:garm.model,size:garm.size,
+            category:garm.cat,color:garm.color||'',fit:garm.fit||'perfect'
+          })
+        });
+        const added = await addRes.json();
+        body.anchor_id = added.id;
+      } catch(e){}
+    }
+
+    const res = await fetch('/api/match',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error(await res.text());
+    result = await res.json();
+  } catch(e){
+    result = clientFallback(garm);
+  }
+
+  S.verdict = result;
+  buildResultCard(result);
+
+  btn.disabled=false;
+  btn.innerHTML=`<span id="contLabel">Calculate My Size</span>
+    <svg id="contArrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+
+  goTo('s4');
+}
+
+function clientFallback(garm){
+  const sizes = S.pSizes;
+  const pref  = S.pref;
+  const pOff  = pref==='fitted'?-1:pref==='relaxed'?1:0;
+  const midIdx= Math.floor(sizes.length/2);
+  const idx   = Math.max(0,Math.min(sizes.length-1,midIdx+pOff));
+  const rec   = sizes[idx]||'M';
+  const conf  = pref==='true_to_anchor'?94:89;
+  const risk  = +(3.8-(conf-80)*0.08).toFixed(1);
+  const name  = garm?`${garm.brand} ${garm.size}`:'your anchor';
+  const offStr= v => v===0?'Identical':v>0?`+${v.toFixed(1)} cm`:` ${v.toFixed(1)} cm`;
+
+  const fp = S.pCat==='bottoms' ? [
+    {zone:'Waistband',       delta:offStr(pOff*0.8),  assessment:pOff===0?'True match':'Adjusted',           note:`Compared against your ${name}.`},
+    {zone:'Thigh Sweep',     delta:offStr(0.7+pOff*0.5),assessment:'Natural clearance',                       note:'Comfortable seated range of motion.'},
+    {zone:'Inseam Length',   delta:'+0.5 cm',           assessment:'Clean break',                              note:'Standard break over footwear.'},
+  ]:[
+    {zone:'Shoulder Seam',   delta:offStr(pOff*0.6),  assessment:pOff===0?'Identical to anchor':'Adjusted',  note:`Aligns with your ${name}.`},
+    {zone:'Chest Circumference',delta:offStr(0.5+pOff),assessment:'Comfortable drape',                       note:'Natural respiration room without pulling.'},
+    {zone:'Body Length',     delta:'+1.0 cm',           assessment:'Clean hem',                               note:'Sits at natural pelvic landmark.'},
+  ];
+
+  return {
+    recommended_size:rec,fit_confidence_pct:conf,return_risk_pct:risk,
+    anchor_used:garm?`${garm.brand} ${garm.model} (${garm.size})`:'Your anchor',
+    target_product:`${S.pBrand} — ${S.pName}`,
+    verdict_summary:`Order size <strong>${rec}</strong>. Same drape as your ${name}.`,
+    friction_points:fp,
+  };
+}
+
+function buildResultCard(v){
+  const deltaClass = d => {
+    if(d==='Identical'||d==='+0.0 cm') return 'dn';
+    const n=parseFloat(d); if(isNaN(n)||Math.abs(n)<0.6) return 'dn';
+    return n>0?'dp':Math.abs(n)<2?'dm':'dr';
+  };
+
+  const orderRow = S.pUrl?`
+    <div class="prod-link">
+      <div style="color:var(--blue);flex-shrink:0">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+      </div>
+      <div class="prod-link-txt">
+        <strong>${S.pBrand} · ${S.pName}</strong>
+        Tap to open the product page
+      </div>
+      <button class="order-btn" onclick="window.open('${S.pUrl}','_blank')">Order ↗</button>
+    </div>`:
+    `<div style="height:4px"></div>`;
+
+  document.getElementById('resCard').innerHTML=`
+    <div class="res-top">
+      <div class="res-confirm">
+        <span class="res-dot"></span>
+        Size Verified &nbsp;·&nbsp; ${v.target_product||S.pBrand+' '+S.pName}
+      </div>
+      <div class="res-size-row">
+        <div class="res-sz">${v.recommended_size}</div>
+        <div class="res-match">
+          <div class="res-pct">${v.fit_confidence_pct}%</div>
+          <div class="res-pct-l">Match</div>
+        </div>
+      </div>
+      <p class="res-verdict">${v.verdict_summary}</p>
+      <div class="res-anchor">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Matched against: ${v.anchor_used}
+      </div>
+    </div>
+
+    <div class="bk">
+      <div class="bk-head">How it will feel on your body</div>
+      ${(v.friction_points||[]).map(f=>`
+        <div class="bk-row">
+          <div class="bk-left">
+            <span class="bk-zone">${f.zone}</span>
+            <span class="bk-asmt dimmer"> · ${f.assessment}</span>
+            <div class="bk-note">${f.note}</div>
+          </div>
+          <div class="bk-delta ${deltaClass(f.delta)}">${f.delta}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="risk-strip">
+      <div class="risk-lbl">Return risk <span class="risk-base">32%</span></div>
+      <div class="risk-val">${v.return_risk_pct}%</div>
+    </div>
+
+    ${orderRow}
+
+    <div class="res-ctas">
+      ${S.pUrl?`
+        <button class="btn-main" onclick="window.open('${S.pUrl}','_blank')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Order Size ${v.recommended_size} on ${urlDomain(S.pUrl)}
+        </button>`:`
+        <button class="btn-main" onclick="startOver()">
+          Order Size ${v.recommended_size}
+        </button>`}
+      <button class="btn-ghost" onclick="startOver()">← Compare a different product</button>
+    </div>
+  `;
+}
+
+function urlDomain(url){try{return new URL(url).hostname.replace('www.','')}catch(e){return 'store'}}
+function startOver(){document.getElementById('brandLink').click(); S.verdict=null;}
+
+// ══════════════════════════════════════════════════
+//  WARDROBE PAGE
+// ══════════════════════════════════════════════════
+function renderWardrobePage(){
+  const filtered = S.filterCat==='all'?S.closet:S.closet.filter(g=>g.cat===S.filterCat);
+  const ct = document.getElementById('wrdCount');
+  ct.textContent = `${S.closet.length} saved piece${S.closet.length!==1?'s':''}`;
+
+  const list=document.getElementById('wrdList');
+  const empty=document.getElementById('wrdEmpty');
+
+  if(!filtered.length){ list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+
+  list.innerHTML=filtered.map(g=>`
+    <div class="wrd-item" id="wi-${g.id}">
+      <div class="wrd-cat-icon">${CAT_ICONS[g.cat]||'👕'}</div>
+      <div class="wrd-info">
+        <div class="wrd-brand">${g.brand}</div>
+        <div class="wrd-name">${g.model}</div>
+        <div class="wrd-meta">${CAT_LABELS[g.cat]||g.cat} · Size ${g.size}${g.color?' · '+g.color:''}</div>
+      </div>
+      <div class="wrd-acts">
+        <button class="ic-btn" onclick="openModal('${g.id}')" title="Edit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+        <button class="ic-btn del" onclick="deleteGarment('${g.id}')" title="Remove">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function doFilter(cat,btn){
+  S.filterCat=cat;
+  document.querySelectorAll('.filter-chip').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  renderWardrobePage();
+}
+
+function deleteGarment(id){
+  const idx=S.closet.findIndex(g=>g.id===id);
+  if(idx===-1) return;
+  S.deleted={item:S.closet[idx],idx};
+  const el=document.getElementById('wi-'+id);
+  if(el){ el.classList.add('removing'); setTimeout(()=>el.remove(),200); }
+  S.closet.splice(idx,1);
+  saveCloset();
+  if(S.cur==='s5') renderWardrobePage();
+  if(S.cur==='s2') renderAnchorList();
+  if(S.anchorId===id) S.anchorId=null;
+  showSnack('Garment removed');
+}
+
+function undoDel(){
+  if(!S.deleted) return;
+  S.closet.splice(S.deleted.idx,0,S.deleted.item);
+  S.deleted=null;
+  saveCloset();
+  if(S.cur==='s5') renderWardrobePage();
+  if(S.cur==='s2') renderAnchorList();
+  hideSnack();
+}
+
+function updateCount(){
+  document.getElementById('wCount').textContent=S.closet.length;
+  const el=document.getElementById('wrdCount');
+  if(el) el.textContent=`${S.closet.length} saved piece${S.closet.length!==1?'s':''}`;
+}
+
+// ══════════════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════════════
+function openModal(id){
+  S.editId=id;
+  const title=document.getElementById('mTitle');
+  const sub=document.getElementById('mSub');
+  const save=document.getElementById('mSave');
+  if(id){
+    const g=S.closet.find(x=>x.id===id);
+    title.textContent='Edit Garment';
+    sub.textContent='Update the details below.';
+    save.textContent='Save Changes';
+    document.getElementById('mBrand').value=g.brand;
+    document.getElementById('mModel').value=g.model;
+    document.getElementById('mSz').value=g.size;
+    document.getElementById('mCat').value=g.cat;
+    document.getElementById('mColor').value=g.color||'';
+    document.getElementById('mFit').value=g.fit||'perfect';
+  } else {
+    title.textContent='Add Garment';
+    sub.textContent='A piece that fits you well, used as your sizing anchor.';
+    save.textContent='Save to Wardrobe';
+    ['mBrand','mModel','mSz','mColor'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('mCat').value='tops';
+    document.getElementById('mFit').value='perfect';
+  }
+  document.getElementById('modalBg').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>document.getElementById('mBrand').focus(),350);
+}
+
+function closeModal(){
+  document.getElementById('modalBg').classList.remove('open');
+  document.body.style.overflow='';
+  S.editId=null;
+}
+
+function bgClick(e){ if(e.target===document.getElementById('modalBg')) closeModal(); }
+
+function saveModal(){
+  const brand=document.getElementById('mBrand').value.trim();
+  const model=document.getElementById('mModel').value.trim();
+  const size =document.getElementById('mSz').value.trim();
+  const cat  =document.getElementById('mCat').value;
+  const color=document.getElementById('mColor').value.trim();
+  const fit  =document.getElementById('mFit').value;
+  if(!brand){shake('mBrand');document.getElementById('mBrand').focus();return;}
+  if(!model){shake('mModel');document.getElementById('mModel').focus();return;}
+  if(!size) {shake('mSz');  document.getElementById('mSz').focus();   return;}
+
+  if(S.editId){
+    const idx=S.closet.findIndex(g=>g.id===S.editId);
+    if(idx!==-1) S.closet[idx]={...S.closet[idx],brand,model,size,cat,color,fit,_builtin:null};
+  } else {
+    S.closet.unshift({id:'u'+Date.now(),brand,model,size,cat,color,fit,_builtin:null});
+  }
+  saveCloset();
+  closeModal();
+  if(S.cur==='s5') renderWardrobePage();
+  if(S.cur==='s2') renderAnchorList();
+}
+
+// ══════════════════════════════════════════════════
+//  SNACK
+// ══════════════════════════════════════════════════
+function showSnack(msg){
+  document.getElementById('snackTxt').textContent=msg;
+  document.getElementById('snack').classList.add('on');
+  if(S.snackTmr) clearTimeout(S.snackTmr);
+  S.snackTmr=setTimeout(hideSnack,4000);
+}
+function hideSnack(){document.getElementById('snack').classList.remove('on')}
+
+// ══════════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════════
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function shake(id){
+  const el=typeof id==='string'?document.getElementById(id):id;
+  if(!el) return;
+  el.style.animation='none'; el.offsetHeight;
+  el.style.animation='shakex .3s ease';
+  setTimeout(()=>el.style.animation='',400);
+}
+
+
+
+</script>
+</body>
+</html>
