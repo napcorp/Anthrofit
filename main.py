@@ -19,13 +19,17 @@ from engine.ai_lookup import (
 )
 from data.analytics_database import ENTERPRISE_ANALYTICS
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 app = FastAPI(
     title="AnthroFit OS",
     description="Physics-based garment sizing intelligence platform with Gemini AI",
     version="4.0.0"
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+static_dir = os.path.join(BASE_DIR, "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # ─────────────────────────────────────────────────────────────
 # REQUEST SCHEMAS
@@ -119,7 +123,8 @@ def _build_session_anchor(req: AddAnchorRequest) -> dict:
 # ─────────────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
 async def serve_app():
-    with open(os.path.join("templates", "questionnaire.html"), "r", encoding="utf-8") as f:
+    tmpl_path = os.path.join(BASE_DIR, "templates", "questionnaire.html")
+    with open(tmpl_path, "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
 
 
