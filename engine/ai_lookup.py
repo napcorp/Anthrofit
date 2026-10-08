@@ -128,8 +128,8 @@ def _clean_json_response(raw_text: str) -> dict:
 
 def _sync_gemini_call(client: genai.Client, prompt: str) -> str:
     """Execute Gemini call synchronously with model fallback."""
-    # List of models to try in priority order (Gemini 3 Flash first)
-    candidate_models = ["gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
+    env_model = os.environ.get("GEMINI_MODEL")
+    candidate_models = [env_model] if env_model else ["gemini-2.5-flash", "gemini-3.8-flash"]
     last_err = None
 
     for model_name in candidate_models:
@@ -246,7 +246,9 @@ async def lookup_product(query: str, url: str = "") -> Dict[str, Any]:
 def convert_ai_sizes_to_dims(size_chart: dict, category: str) -> dict:
     """
     Convert AI-returned size chart measurements to internal engine dimensions.
-    Returns {size_tag: {dim_key: value_in_half_cm, ...}, ...}
+    Gracefully normalizes between full body circumference (e.g. 84cm waist)
+    and flat garment measurement (e.g. 42cm waist).
+    Returns {size_tag: {dim_key: value_in_cad_half_cm, ...}, ...}
     """
     result = {}
     is_bottom = category == "bottoms"
@@ -257,32 +259,240 @@ def convert_ai_sizes_to_dims(size_chart: dict, category: str) -> dict:
         dims = {}
         if is_bottom:
             if "waist_cm" in measurements and measurements["waist_cm"]:
-                dims["waist_half"] = float(measurements["waist_cm"]) / 2.0
+                w = float(measurements["waist_cm"])
+                dims["waist_half"] = round(w / 4.0 if w > 52 else w / 2.0, 2)
             if "hip_cm" in measurements and measurements["hip_cm"]:
-                dims["hip_half"] = float(measurements["hip_cm"]) / 2.0
+                h = float(measurements["hip_cm"])
+                dims["hip_half"] = round(h / 4.0 if h > 65 else h / 2.0, 2)
             if "thigh_cm" in measurements and measurements["thigh_cm"]:
-                dims["thigh_half"] = float(measurements["thigh_cm"]) / 2.0
+                t = float(measurements["thigh_cm"])
+                dims["thigh_half"] = round(t / 4.0 if t > 36 else t / 2.0, 2)
             if "inseam_cm" in measurements and measurements["inseam_cm"]:
-                dims["inseam"] = float(measurements["inseam_cm"])
+                dims["inseam"] = round(float(measurements["inseam_cm"]), 1)
             if "rise_cm" in measurements and measurements["rise_cm"]:
-                dims["front_rise"] = float(measurements["rise_cm"])
+                dims["front_rise"] = round(float(measurements["rise_cm"]), 1)
             if "knee_cm" in measurements and measurements["knee_cm"]:
-                dims["knee_half"] = float(measurements["knee_cm"]) / 2.0
+                k = float(measurements["knee_cm"])
+                dims["knee_half"] = round(k / 4.0 if k > 24 else k / 2.0, 2)
             if "leg_opening_cm" in measurements and measurements["leg_opening_cm"]:
-                dims["leg_opening_half"] = float(measurements["leg_opening_cm"]) / 2.0
+                lo = float(measurements["leg_opening_cm"])
+                dims["leg_opening_half"] = round(lo / 4.0 if lo > 20 else lo / 2.0, 2)
         else:
             if "chest_cm" in measurements and measurements["chest_cm"]:
-                dims["chest_half"] = float(measurements["chest_cm"]) / 2.0
+                c = float(measurements["chest_cm"])
+                dims["chest_half"] = round(c / 4.0 if c > 68 else c / 2.0, 2)
             if "shoulder_cm" in measurements and measurements["shoulder_cm"]:
-                dims["shoulder_width"] = float(measurements["shoulder_cm"])
+                dims["shoulder_width"] = round(float(measurements["shoulder_cm"]), 1)
             if "length_cm" in measurements and measurements["length_cm"]:
-                dims["torso_length"] = float(measurements["length_cm"])
+                dims["torso_length"] = round(float(measurements["length_cm"]), 1)
             if "sleeve_cm" in measurements and measurements["sleeve_cm"]:
-                dims["sleeve_length"] = float(measurements["sleeve_cm"])
+                dims["sleeve_length"] = round(float(measurements["sleeve_cm"]), 1)
             if "neck_cm" in measurements and measurements["neck_cm"]:
-                dims["neck_width"] = float(measurements["neck_cm"])
+                dims["neck_width"] = round(float(measurements["neck_cm"]), 1)
 
         if dims:
             result[size_tag] = dims
 
     return result
+
+
+# ─────────────────────────────────────────────────────────────
+# VISION IDENTIFICATION: Garment / Tag Image Recognition
+# ─────────────────────────────────────────────────────────────
+VISION_SYSTEM_INSTRUCTION = """You are an expert fashion patternmaker and computer vision engine for clothing.
+You analyze images of garments (laid flat, hanging, worn, or e-commerce screenshots) OR photos of clothing tags / care labels.
+
+Your job is to identify the clothing piece across ALL categories of clothing:
+1. Tops: T-shirts, dress shirts, casual shirts, polo shirts, tank tops, henleys.
+2. Bottoms: Trousers, dress slacks, chinos, jeans, denim pants, cargo pants, joggers, shorts.
+3. Outerwear: Jackets, overshirts, coats, blazers, trench coats, bombers, parkas.
+4. Knitwear: Sweaters, crewnecks, cardigans, pullovers, knit vests, hoodies.
+
+If the photo shows a clothing tag or care label:
+- Read the brand name, size, material composition, cut/style name, RN number, or wash instructions.
+
+Return ONLY a valid JSON object with this exact schema (no markdown, no backticks, no explanatory text):
+{
+  "brand": "Brand name (e.g. Levi's, COS, Zara, Uniqlo, Carhartt, Ralph Lauren, Nike) or 'Standard Cut' if unknown",
+  "name": "Specific model or descriptive title (e.g. 511 Slim Fit Jeans, Pleated Wide-Leg Trousers, Supima Cotton T-Shirt, Heavyweight Zip Hoodie)",
+  "category": "tops|bottoms|outerwear|knitwear",
+  "subcategory": "jeans|trousers|chinos|pants|t-shirt|shirt|hoodie|jacket|sweater|shorts",
+  "color": "Detected color or wash (e.g. Indigo Dark Wash, Washed Black, Sand Beige, Navy)",
+  "fabric_description": "Material (e.g. 99% Cotton 1% Elastane Denim, 100% Wool Twill, French Terry)",
+  "retail_price": "Estimated retail price with symbol e.g. '$79' or ''",
+  "available_sizes": ["28", "30", "32", "34", "36"] or ["XS", "S", "M", "L", "XL", "XXL"],
+  "detected_tag_size": "Size specifically seen on tag (e.g. '32', 'M', '31x32') or null",
+  "size_chart": {
+    "size_tag": {
+      // FOR BOTTOMS (pants/jeans/trousers):
+      // "waist_cm": 82, "hip_cm": 104, "thigh_cm": 60, "inseam_cm": 81, "rise_cm": 28
+      // FOR TOPS / OUTERWEAR / KNITWEAR:
+      // "chest_cm": 102, "shoulder_cm": 46, "length_cm": 72, "sleeve_cm": 65
+    }
+  },
+  "fit_notes": "Concise silhouette summary (e.g. 'Slim straight cut with mid rise', 'Relaxed boxy drop-shoulder cut')"
+}
+
+CRITICAL RULES:
+- Trousers, pants, jeans, chinos, slacks, joggers, shorts MUST be category 'bottoms'.
+- All measurements in size_chart must be in centimeters (cm).
+- available_sizes must be an array of standard sizes for that garment type.
+- Return ONLY the JSON object."""
+
+
+def _synthesize_fallback_sizes(category: str, subcategory: str = "") -> tuple[list, dict]:
+    """Provide realistic default size offerings and measurements when not detected."""
+    sub = (subcategory or "").lower()
+    if category == "bottoms" and not any(w in sub for w in ["jogger", "sweat"]):
+        sizes = ["28", "29", "30", "31", "32", "33", "34", "36"]
+        chart = {
+            "28": {"waist_cm": 74.0, "hip_cm": 96.0, "thigh_cm": 56.0, "inseam_cm": 81.0, "rise_cm": 26.5},
+            "29": {"waist_cm": 76.5, "hip_cm": 98.5, "thigh_cm": 57.5, "inseam_cm": 81.0, "rise_cm": 27.0},
+            "30": {"waist_cm": 79.0, "hip_cm": 101.0, "thigh_cm": 59.0, "inseam_cm": 81.0, "rise_cm": 27.5},
+            "31": {"waist_cm": 81.5, "hip_cm": 103.5, "thigh_cm": 60.5, "inseam_cm": 81.5, "rise_cm": 28.0},
+            "32": {"waist_cm": 84.0, "hip_cm": 106.0, "thigh_cm": 62.0, "inseam_cm": 81.5, "rise_cm": 28.5},
+            "33": {"waist_cm": 86.5, "hip_cm": 108.5, "thigh_cm": 63.5, "inseam_cm": 82.0, "rise_cm": 29.0},
+            "34": {"waist_cm": 89.0, "hip_cm": 111.0, "thigh_cm": 65.0, "inseam_cm": 82.0, "rise_cm": 29.5},
+            "36": {"waist_cm": 94.0, "hip_cm": 116.0, "thigh_cm": 68.0, "inseam_cm": 82.5, "rise_cm": 30.5},
+        }
+    else:
+        sizes = ["XS", "S", "M", "L", "XL", "XXL"]
+        chart = {
+            "XS": {"chest_cm": 92.0, "shoulder_cm": 43.0, "length_cm": 68.0, "sleeve_cm": 23.0},
+            "S":  {"chest_cm": 96.0, "shoulder_cm": 45.0, "length_cm": 70.0, "sleeve_cm": 24.0},
+            "M":  {"chest_cm": 102.0, "shoulder_cm": 47.5, "length_cm": 72.0, "sleeve_cm": 25.0},
+            "L":  {"chest_cm": 108.0, "shoulder_cm": 50.0, "length_cm": 74.0, "sleeve_cm": 26.0},
+            "XL": {"chest_cm": 116.0, "shoulder_cm": 53.0, "length_cm": 76.0, "sleeve_cm": 27.0},
+            "XXL":{"chest_cm": 124.0, "shoulder_cm": 56.0, "length_cm": 78.0, "sleeve_cm": 28.0},
+        }
+    return sizes, chart
+
+
+def _sync_gemini_vision_call(client: genai.Client, image_bytes: bytes, mime_type: str) -> str:
+    """Execute Gemini vision call synchronously."""
+    env_model = os.environ.get("GEMINI_MODEL")
+    candidate_models = [env_model] if env_model else ["gemini-2.5-flash", "gemini-3.8-flash"]
+    last_err = None
+
+    prompt = (
+        "Identify this garment or clothing tag. Determine the brand, exact piece name, "
+        "clothing category (tops, bottoms, outerwear, knitwear), and sizing chart."
+    )
+
+    for model_name in candidate_models:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=[
+                    prompt,
+                    types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+                ],
+                config=types.GenerateContentConfig(
+                    system_instruction=VISION_SYSTEM_INSTRUCTION,
+                    temperature=0.1,
+                )
+            )
+            if response and response.text:
+                return response.text
+        except Exception as e:
+            last_err = e
+            err_str = str(e).lower()
+            if "api_key" in err_str or "unauthenticated" in err_str or "401" in err_str:
+                raise e
+            continue
+
+    if last_err:
+        raise last_err
+    raise RuntimeError("No response received from Gemini Vision.")
+
+
+async def identify_garment_from_image(image_bytes: bytes, mime_type: str = "image/jpeg") -> Dict[str, Any]:
+    """
+    Multimodal clothing analyzer: recognizes shirts, trousers, jeans, jackets,
+    care tags, or brand labels from photo.
+    """
+    client = _get_client()
+    if not client:
+        return {
+            "error": "No API key configured in .env for Gemini Vision."
+        }
+
+    try:
+        raw_text = await asyncio.to_thread(_sync_gemini_vision_call, client, image_bytes, mime_type)
+        data = _clean_json_response(raw_text)
+
+        # Normalize and validate extracted fields
+        brand = (data.get("brand") or "").strip() or "Standard Cut"
+        name = (data.get("name") or "").strip() or "Garment"
+        category = (data.get("category") or "").strip().lower()
+        subcategory = (data.get("subcategory") or "").strip().lower()
+
+        # Enforce all-rounder classification
+        bottom_keywords = ["pant", "trouser", "jean", "chino", "short", "jogger", "slack", "bottom", "cargo"]
+        outerwear_keywords = ["jacket", "coat", "blazer", "parka", "windbreaker", "overshirt", "bomber"]
+        knitwear_keywords = ["sweater", "cardigan", "knit", "pullover"]
+
+        combined_text = f"{name} {subcategory} {category}".lower()
+        if any(w in combined_text for w in bottom_keywords):
+            category = "bottoms"
+        elif any(w in combined_text for w in outerwear_keywords):
+            category = "outerwear"
+        elif any(w in combined_text for w in knitwear_keywords):
+            category = "knitwear"
+        elif category not in ("tops", "bottoms", "outerwear", "knitwear"):
+            category = "tops"
+
+        data["brand"] = brand
+        data["name"] = name
+        data["category"] = category
+        data["subcategory"] = subcategory
+
+        # Ensure available sizes
+        avail_sizes = data.get("available_sizes")
+        if not avail_sizes or not isinstance(avail_sizes, list) or len(avail_sizes) == 0:
+            def_sizes, def_chart = _synthesize_fallback_sizes(category, subcategory)
+            data["available_sizes"] = def_sizes
+            if not data.get("size_chart"):
+                data["size_chart"] = def_chart
+        else:
+            data["available_sizes"] = [str(s).strip() for s in avail_sizes]
+
+        # Ensure size chart covers all available sizes
+        size_chart = data.get("size_chart")
+        _, def_chart = _synthesize_fallback_sizes(category, subcategory)
+
+        clean_chart = {}
+        if isinstance(size_chart, dict) and size_chart:
+            if "size_tag" in size_chart and len(size_chart) == 1:
+                # Model provided single template measurement; grade using standard CAD offsets
+                template = size_chart["size_tag"]
+                for sz in data["available_sizes"]:
+                    if sz in def_chart:
+                        clean_chart[sz] = def_chart[sz]
+                    else:
+                        clean_chart[sz] = template
+            else:
+                for sz in data["available_sizes"]:
+                    if sz in size_chart and isinstance(size_chart[sz], dict):
+                        clean_chart[sz] = size_chart[sz]
+                    elif sz in def_chart:
+                        clean_chart[sz] = def_chart[sz]
+
+        if not clean_chart:
+            clean_chart = def_chart
+            data["available_sizes"] = list(def_chart.keys())
+
+        data["size_chart"] = clean_chart
+
+        # Compute internal dimensional mapping
+        data["ai_dims"] = convert_ai_sizes_to_dims(data["size_chart"], category)
+
+        return data
+
+    except Exception as e:
+        err_msg = str(e)
+        if "API_KEY" in err_msg.upper() or "401" in err_msg or "403" in err_msg:
+            return {"error": "Invalid API key in .env"}
+        if "RESOURCE_EXHAUSTED" in err_msg or "429" in err_msg:
+            return {"error": "API rate limit reached. Please wait a moment and try again."}
+        return {"error": f"Vision analysis failed: {err_msg}"}

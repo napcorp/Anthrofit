@@ -3,11 +3,13 @@ AnthroFit OS — Main Server v4.0
 Real physics-based garment matching + Gemini AI product lookup
 """
 import os
+import base64
 import asyncio
 from typing import Dict, Any, List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from data.real_catalog import ANCHOR_LIBRARY, PRODUCT_CATALOG, DOMAIN_BRAND_MAP
@@ -15,7 +17,8 @@ from engine.real_matcher import (
     compute_top_match, compute_bottom_match, find_target_product
 )
 from engine.ai_lookup import (
-    lookup_product, set_api_key, convert_ai_sizes_to_dims, _get_key
+    lookup_product, set_api_key, convert_ai_sizes_to_dims, _get_key,
+    identify_garment_from_image
 )
 from data.analytics_database import ENTERPRISE_ANALYTICS
 
@@ -25,6 +28,15 @@ app = FastAPI(
     title="AnthroFit OS",
     description="Physics-based garment sizing intelligence platform with Gemini AI",
     version="4.0.0"
+)
+
+# Enable CORS for external e-commerce integrations, SDKs, and development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 static_dir = os.path.join(BASE_DIR, "static")
@@ -60,6 +72,11 @@ class ProductLookupRequest(BaseModel):
 
 class ApiKeyRequest(BaseModel):
     key: str
+
+class VisionIdentifyRequest(BaseModel):
+    image_base64: str
+    mime_type: Optional[str] = "image/jpeg"
+
 
 # ─────────────────────────────────────────────────────────────
 # IN-MEMORY USER SESSION
@@ -128,6 +145,17 @@ async def serve_app():
         return HTMLResponse(content=f.read())
 
 
+@app.get("/health")
+async def health_check():
+    """Health check probe for production load balancers and orchestrators."""
+    has_key = _get_key() is not None
+    return {
+        "status": "healthy",
+        "version": "4.0.0",
+        "ai_enabled": has_key
+    }
+
+
 @app.get("/api/status")
 async def get_status():
     """Check if API key is configured."""
@@ -161,6 +189,38 @@ async def ai_product_lookup(req: ProductLookupRequest):
 
     result["ai_dims"] = ai_dims
     return result
+
+
+@app.post("/api/ai/vision-identify")
+async def vision_identify_clothing(req: VisionIdentifyRequest):
+    """
+    Multimodal visual garment identification.
+    Analyzes user-provided clothing photos or care/size label tags and
+    extracts brand, style, all-rounder category (tops/bottoms/outerwear/knitwear),
+    and size chart measurements.
+    """
+    raw_b64 = req.image_base64
+    mime_type = req.mime_type or "image/jpeg"
+    if "," in raw_b64:
+        header, raw_b64 = raw_b64.split(",", 1)
+        if "image/png" in header:
+            mime_type = "image/png"
+        elif "image/webp" in header:
+            mime_type = "image/webp"
+        elif "image/jpeg" in header or "image/jpg" in header:
+            mime_type = "image/jpeg"
+
+    try:
+        image_bytes = base64.b64decode(raw_b64)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid base64 image data: {str(e)}")
+
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Empty image data provided.")
+
+    result = await identify_garment_from_image(image_bytes, mime_type)
+    return result
+
 
 
 @app.get("/api/catalog/anchors")
@@ -211,10 +271,23 @@ async def resolve_match(req: QuestionnaireRequest):
     anchor = None
     if req.anchor_id in ANCHOR_LIBRARY:
         anchor = ANCHOR_LIBRARY[req.anchor_id]
+    elif f"ANCHOR-{req.anchor_id}" in ANCHOR_LIBRARY:
+        anchor = ANCHOR_LIBRARY[f"ANCHOR-{req.anchor_id}"]
     elif req.anchor_id in session_anchors:
         anchor = session_anchors[req.anchor_id]
+    elif req.custom_anchor_dims:
+        anchor = {
+            "brand": req.product_brand or "Custom",
+            "model": "User Benchmark",
+            "size_tag": "Custom",
+            "category": req.product_category or "tops",
+            "fabric_key": "cotton_jersey_heavy",
+            "dims": req.custom_anchor_dims
+        }
     else:
-        raise HTTPException(status_code=404, detail=f"Anchor '{req.anchor_id}' not found.")
+        # Robust fallback to category default anchor
+        def_aid = "ANCHOR-LEVIS-511-32" if req.product_category == "bottoms" else "ANCHOR-UNIQLO-AIRISM-M"
+        anchor = ANCHOR_LIBRARY.get(def_aid, next(iter(ANCHOR_LIBRARY.values())))
 
     # 2. If AI provided real measurements, use them directly
     if req.ai_size_dims and len(req.ai_size_dims) > 0:
@@ -443,7 +516,10 @@ async def get_analytics():
 
 
 if __name__ == "__main__":
-    print(">> ANTHROFIT OS v4.0 -- AI-Powered Sizing Engine")
-    print(">> http://localhost:8000")
+    host = os.environ.get("HOST", "127.0.0.1")
+    port = int(os.environ.get("PORT", "8000"))
+    reload = os.environ.get("RELOAD", "false").lower() in ("true", "1", "yes")
+    print(f">> ANTHROFIT OS v4.0 -- AI-Powered Sizing Engine")
+    print(f">> Running on http://{host}:{port}")
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=False)
+    uvicorn.run("main:app", host=host, port=port, reload=reload)
