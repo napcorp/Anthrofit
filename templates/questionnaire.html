@@ -34,7 +34,7 @@
    RESET
 ================================================================ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:16px;height:100%;background:var(--g50)}
+html{font-size:16px;height:100%;background:var(--g50);overflow-x:hidden}
 body{
   font-family:'Inter',-apple-system,sans-serif;
   background:var(--g50); color:var(--b);
@@ -776,34 +776,45 @@ button,input,select,textarea{font-family:inherit}
   max-width: 520px;
   margin: 12px auto 6px;
   padding: 0 16px;
+  box-sizing: border-box;
   animation: fadeIn .2s ease;
 }
 .stepper-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.9);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--g200);
   border-radius: var(--rpill);
   padding: 4px 6px;
   box-shadow: var(--sh1);
+  gap: 2px;
 }
 .step-item {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 4px 9px;
+  padding: 4px 8px;
   border-radius: var(--rpill);
   font-size: 11px;
   font-weight: 600;
   color: var(--g400);
   transition: all 0.2s ease;
   user-select: none;
+  min-width: 0;
+  flex: 1 1 0;
+  overflow: hidden;
 }
 .step-item.active {
   background: var(--b);
   color: #fff;
+  flex: 1.35 1 auto;
 }
 .step-item.done {
   color: var(--g800);
@@ -815,6 +826,7 @@ button,input,select,textarea{font-family:inherit}
 .step-num {
   width: 16px;
   height: 16px;
+  min-width: 16px;
   border-radius: 50%;
   background: var(--g150);
   color: var(--g600);
@@ -822,6 +834,7 @@ button,input,select,textarea{font-family:inherit}
   font-weight: 800;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
 }
 .step-item.active .step-num {
   background: #fff;
@@ -831,10 +844,67 @@ button,input,select,textarea{font-family:inherit}
   background: var(--g200g);
   color: var(--green);
 }
+.step-label,
+.step-item span:not(.step-num) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  display: block;
+}
 .step-arrow {
-  font-size: 10px;
+  font-size: 9.5px;
   color: var(--g300);
   font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+  user-select: none;
+}
+
+@media (max-width: 480px) {
+  .stepper-wrap {
+    padding: 0 10px;
+    margin: 8px auto 4px;
+  }
+  .stepper-bar {
+    padding: 3px 4px;
+    gap: 1.5px;
+  }
+  .step-item {
+    gap: 3.5px;
+    padding: 3px 5px;
+    font-size: 10.5px;
+  }
+  .step-item.active {
+    padding: 3.5px 7px;
+  }
+  .step-arrow {
+    font-size: 8.5px;
+  }
+}
+
+@media (max-width: 360px) {
+  .stepper-wrap {
+    padding: 0 6px;
+  }
+  .stepper-bar {
+    padding: 2.5px 3px;
+    gap: 1px;
+  }
+  .step-item {
+    gap: 3px;
+    padding: 2.5px 4px;
+    font-size: 10px;
+  }
+  .step-num {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    font-size: 9px;
+  }
+  .step-arrow {
+    font-size: 8px;
+  }
 }
 
 
@@ -1026,29 +1096,29 @@ button,input,select,textarea{font-family:inherit}
 <!-- Live Step Progress Bar -->
 <div class="stepper-wrap" id="stepperWrap" style="display:none">
   <div class="stepper-bar">
-    <div class="step-item" id="step-s1" onclick="stepClick('s1')">
+    <div class="step-item" id="step-s1" title="Product" onclick="stepClick('s1')">
       <span class="step-num">1</span>
-      <span>Product</span>
+      <span class="step-label">Product</span>
     </div>
     <div class="step-arrow">›</div>
-    <div class="step-item" id="step-s1b" onclick="stepClick('s1b')">
+    <div class="step-item" id="step-s1b" title="Sizes" onclick="stepClick('s1b')">
       <span class="step-num">2</span>
-      <span>Sizes</span>
+      <span class="step-label">Sizes</span>
     </div>
     <div class="step-arrow">›</div>
-    <div class="step-item" id="step-s2" onclick="stepClick('s2')">
+    <div class="step-item" id="step-s2" title="Anchor" onclick="stepClick('s2')">
       <span class="step-num">3</span>
-      <span>Anchor</span>
+      <span class="step-label">Anchor</span>
     </div>
     <div class="step-arrow">›</div>
-    <div class="step-item" id="step-s3" onclick="stepClick('s3')">
+    <div class="step-item" id="step-s3" title="Drape" onclick="stepClick('s3')">
       <span class="step-num">4</span>
-      <span>Drape</span>
+      <span class="step-label">Drape</span>
     </div>
     <div class="step-arrow">›</div>
-    <div class="step-item" id="step-s4">
+    <div class="step-item" id="step-s4" title="Verdict">
       <span class="step-num">5</span>
-      <span>Verdict</span>
+      <span class="step-label">Verdict</span>
     </div>
   </div>
 </div>
