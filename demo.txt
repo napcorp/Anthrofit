@@ -1,0 +1,54 @@
+#### **Part 1: The Hook & Core Thesis (0:00 – 0:20 | 20s)**
+- **Action:** Mouse over the hero badge *"No measuring tape. No guessing."*
+- **Talking Points:**
+  > *"Over 30% of online apparel orders get returned, and 70% of those returns happen because alphanumeric sizing tags (S, M, L) are broken. They ignore fabric stretch and body drape.*  
+  > *Instead of asking shoppers for measuring tapes or invasive webcam scans, AnthroFit uses **Reverse Garment Tolerance**: the clothes you already own contain the exact mathematical answer to your body’s volume."*
+
+---
+
+#### **Part 2: The Benchmark Wardrobe (0:20 – 0:40 | 20s)**
+- **Action:** 
+  1. Show existing anchor garments (e.g., *Uniqlo AIRism Oversized Tee*, *Levi's 511*).
+  2. Filter by category chips (*Tops, Bottoms, Outerwear*).
+  3. Click **Add**, show the bottom modal with fabric stretch curves, and close it.
+- **Talking Points:**
+  > *"Everything starts with the shopper's personal anchor wardrobe. Here, users calibrate garments they already wear and love. AnthroFit stores the true 8-point CAD cutting dimensions and fabric elasticity curves—from heavy jersey knit to raw rigid denim."*
+
+---
+
+#### **Part 3: Dual Product Ingestion — AI & Multimodal Vision (0:40 – 1:10 | 30s)**
+- **Action:**
+  1. Type or click a quick pick: `COS Heavyweight T-Shirt` or paste a URL (watch the automatic domain badge and favicon appear!).
+  2. Point to the **"Snap or Upload Clothing Photo"** scanner.
+  3. Hit **Continue**: show the live Gemini AI Search Grounding card displaying official brand dimensions, category, and retail price.
+- **Talking Points:**
+  > *"When shopping for something new, shoppers can paste a product URL, type the name, or snap a photo of a care tag with our Multimodal Vision engine.*  
+  > *Our Gemini AI automatically crawls the web with Google Search grounding to retrieve the manufacturer's official sizing chart and cut specs in real time."*
+
+---
+
+#### **Part 4: Sizes, Anchor Pairing & Drape Physics (1:10 – 1:35 | 25s)**
+- **Action:**
+  1. **Step 2 (Sizes):** Show the auto-selected size chips (XS to XXL). Click **Choose My Reference**.
+  2. **Step 3 (Anchor):** Select **Uniqlo AIRism Cotton Oversized T-Shirt (M)**.
+  3. **Step 4 (Drape):** Show the 3 tolerance options (*Sharp & Fitted*, *True to Anchor*, *Relaxed & Oversized*). Select **True to My Anchor**.
+- **Talking Points:**
+  > *"Next, we select which piece from our wardrobe we want to match against. Then, we set our drape preference. This dynamically shifts tolerance thresholds—accounting for whether you want a tailored fit or relaxed streetwear ease."*
+
+---
+
+#### **Part 5: The Verdict — CAD Silhouette, Fit Spectrum & Friction Breakdown (1:35 – 2:05 | 30s)**
+- **Action:**
+  1. **Size Fit Spectrum:** Click across sizes (`S`, `M`, `L`) to show live tactile penalty recalculation and why `M` is the recommended optimal match.
+  2. **CAD Vector Silhouette:** Highlight the dual-line SVG overlay (Target silhouette in blue vs. Anchor benchmark in orange).
+  3. **Anatomical Friction Breakdown:** Scroll to show deltas (`+1.1 cm shoulder drop`, `chest ease`, `friction notes`).
+  4. Point to the **Fit Confidence (94%)** and **Predicted Return Risk (4.2% vs 32% baseline)**.
+  5. Click **"Copy Sizing Summary"** (shows toast).
+- **Talking Points:**
+  > *"In milliseconds, the physics engine solves the match. We don't just give a size; we give complete anatomical transparency:*  
+  > *1. **The Size Spectrum** reveals tactile friction scores across all sizes.*  
+  > *2. **The CAD Differential Silhouette** visually overlays the target cut pattern directly onto your anchor.*  
+  > *3. **The Friction Breakdown** explains exact centimeter variances at the shoulder seam and chest volume.*  
+  > *Predicted return risk drops from the industry baseline of 32% down to under 5%."*
+
+---

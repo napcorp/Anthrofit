@@ -302,39 +302,58 @@ def convert_ai_sizes_to_dims(size_chart: dict, category: str) -> dict:
 VISION_SYSTEM_INSTRUCTION = """You are an expert fashion patternmaker and computer vision engine for clothing.
 You analyze images of garments (laid flat, hanging, worn, or e-commerce screenshots) OR photos of clothing tags / care labels.
 
-Your job is to identify the clothing piece across ALL categories of clothing:
+Your job is to identify the clothing piece across ALL categories of clothing worldwide:
 1. Tops: T-shirts, dress shirts, casual shirts, polo shirts, tank tops, henleys.
 2. Bottoms: Trousers, dress slacks, chinos, jeans, denim pants, cargo pants, joggers, shorts.
 3. Outerwear: Jackets, overshirts, coats, blazers, trench coats, bombers, parkas.
 4. Knitwear: Sweaters, crewnecks, cardigans, pullovers, knit vests, hoodies.
+5. South Asian & Draped Garments: Saris (sarees), lehengas, salwar kameez, kurtas, sherwanis, blouses, dupattas, anarkalis, churidars.
+
+SPECIAL RULES FOR SARIS / SAREES:
+- A sari is an unstitched draped fabric (typically 5-9 yards / 4.5-8.2 meters long, 1.1-1.2 meters wide).
+- The SIZE-CRITICAL fitted component of a sari ensemble is the BLOUSE (choli). The blouse has measurable chest, shoulder, length, and sleeve dimensions.
+- When you identify a sari, set category to "tops" and subcategory to "sari_blouse".
+- For the size_chart, provide blouse measurements (chest_cm, shoulder_cm, length_cm, sleeve_cm).
+- In fit_notes, include sari details: fabric type (silk, chiffon, georgette, cotton, banarasi, etc.), drape length in meters, border/pallu description.
+- In fabric_description, describe the sari fabric itself (e.g. "Pure Kanjivaram Silk", "Banarasi Brocade", "Georgette with Zari Work").
+
+SPECIAL RULES FOR KURTAS / KAMEEZ:
+- Kurtas and kameez are category "tops", subcategory "kurta".
+- Provide chest_cm, shoulder_cm, length_cm, sleeve_cm in size_chart.
+
+SPECIAL RULES FOR LEHENGAS:
+- A lehenga is a skirt, categorize as "bottoms", subcategory "lehenga".
+- Provide waist_cm, hip_cm, length_cm (skirt length) in size_chart.
 
 If the photo shows a clothing tag or care label:
 - Read the brand name, size, material composition, cut/style name, RN number, or wash instructions.
 
 Return ONLY a valid JSON object with this exact schema (no markdown, no backticks, no explanatory text):
 {
-  "brand": "Brand name (e.g. Levi's, COS, Zara, Uniqlo, Carhartt, Ralph Lauren, Nike) or 'Standard Cut' if unknown",
-  "name": "Specific model or descriptive title (e.g. 511 Slim Fit Jeans, Pleated Wide-Leg Trousers, Supima Cotton T-Shirt, Heavyweight Zip Hoodie)",
+  "brand": "Brand name (e.g. Levi's, COS, Zara, Uniqlo, Sabyasachi, FabIndia, Manyavar) or 'Standard Cut' if unknown",
+  "name": "Specific model or descriptive title (e.g. 511 Slim Fit Jeans, Kanjivaram Silk Sari, Banarasi Brocade Saree, Anarkali Suit Set)",
   "category": "tops|bottoms|outerwear|knitwear",
-  "subcategory": "jeans|trousers|chinos|pants|t-shirt|shirt|hoodie|jacket|sweater|shorts",
-  "color": "Detected color or wash (e.g. Indigo Dark Wash, Washed Black, Sand Beige, Navy)",
-  "fabric_description": "Material (e.g. 99% Cotton 1% Elastane Denim, 100% Wool Twill, French Terry)",
-  "retail_price": "Estimated retail price with symbol e.g. '$79' or ''",
-  "available_sizes": ["28", "30", "32", "34", "36"] or ["XS", "S", "M", "L", "XL", "XXL"],
-  "detected_tag_size": "Size specifically seen on tag (e.g. '32', 'M', '31x32') or null",
+  "subcategory": "jeans|trousers|chinos|pants|t-shirt|shirt|hoodie|jacket|sweater|shorts|sari_blouse|kurta|lehenga|sherwani",
+  "color": "Detected color or wash (e.g. Indigo Dark Wash, Washed Black, Sand Beige, Royal Magenta with Gold Zari)",
+  "fabric_description": "Material (e.g. 99% Cotton 1% Elastane Denim, Pure Kanjivaram Silk, Banarasi Brocade with Zari)",
+  "retail_price": "Estimated retail price with symbol e.g. '$79' or '₹4,500' or ''",
+  "available_sizes": ["28", "30", "32", "34", "36"] or ["XS", "S", "M", "L", "XL", "XXL"] or ["32", "34", "36", "38", "40", "42"],
+  "detected_tag_size": "Size specifically seen on tag (e.g. '32', 'M', '31x32', '38') or null",
   "size_chart": {
     "size_tag": {
-      // FOR BOTTOMS (pants/jeans/trousers):
+      // FOR BOTTOMS (pants/jeans/trousers/lehengas):
       // "waist_cm": 82, "hip_cm": 104, "thigh_cm": 60, "inseam_cm": 81, "rise_cm": 28
-      // FOR TOPS / OUTERWEAR / KNITWEAR:
+      // FOR TOPS / OUTERWEAR / KNITWEAR / SARI BLOUSES / KURTAS:
       // "chest_cm": 102, "shoulder_cm": 46, "length_cm": 72, "sleeve_cm": 65
     }
   },
-  "fit_notes": "Concise silhouette summary (e.g. 'Slim straight cut with mid rise', 'Relaxed boxy drop-shoulder cut')"
+  "fit_notes": "Concise silhouette summary (e.g. 'Slim straight cut with mid rise', 'Relaxed boxy drop-shoulder cut', 'Princess-cut sari blouse; 6.3m pure silk drape with contrast pallu')"
 }
 
 CRITICAL RULES:
-- Trousers, pants, jeans, chinos, slacks, joggers, shorts MUST be category 'bottoms'.
+- Trousers, pants, jeans, chinos, slacks, joggers, shorts, lehengas MUST be category 'bottoms'.
+- Saris/sarees: category MUST be 'tops' (blouse is the fitted sizing component), subcategory 'sari_blouse'.
+- Kurtas, kameez: category MUST be 'tops', subcategory 'kurta'.
 - All measurements in size_chart must be in centimeters (cm).
 - available_sizes must be an array of standard sizes for that garment type.
 - Return ONLY the JSON object."""
@@ -376,7 +395,9 @@ def _sync_gemini_vision_call(client: genai.Client, image_bytes: bytes, mime_type
 
     prompt = (
         "Identify this garment or clothing tag. Determine the brand, exact piece name, "
-        "clothing category (tops, bottoms, outerwear, knitwear), and sizing chart."
+        "clothing category (tops, bottoms, outerwear, knitwear), and sizing chart. "
+        "This includes ALL garment types worldwide: Western wear, saris/sarees, "
+        "kurtas, lehengas, sherwanis, salwar kameez, and any ethnic or traditional clothing."
     )
 
     for model_name in candidate_models:
@@ -428,12 +449,21 @@ async def identify_garment_from_image(image_bytes: bytes, mime_type: str = "imag
         subcategory = (data.get("subcategory") or "").strip().lower()
 
         # Enforce all-rounder classification
-        bottom_keywords = ["pant", "trouser", "jean", "chino", "short", "jogger", "slack", "bottom", "cargo"]
-        outerwear_keywords = ["jacket", "coat", "blazer", "parka", "windbreaker", "overshirt", "bomber"]
+        bottom_keywords = ["pant", "trouser", "jean", "chino", "short", "jogger", "slack", "bottom", "cargo", "lehenga"]
+        outerwear_keywords = ["jacket", "coat", "blazer", "parka", "windbreaker", "overshirt", "bomber", "sherwani"]
         knitwear_keywords = ["sweater", "cardigan", "knit", "pullover"]
+        # Saris, kurtas, blouses → tops (blouse is the fitted sizing component)
+        tops_keywords = ["sari", "saree", "blouse", "choli", "kurta", "kameez", "anarkali", "kurti"]
 
         combined_text = f"{name} {subcategory} {category}".lower()
-        if any(w in combined_text for w in bottom_keywords):
+        if any(w in combined_text for w in tops_keywords):
+            category = "tops"
+            # Refine subcategory for sari detection
+            if any(w in combined_text for w in ["sari", "saree", "choli"]):
+                subcategory = subcategory or "sari_blouse"
+            elif any(w in combined_text for w in ["kurta", "kameez", "kurti", "anarkali"]):
+                subcategory = subcategory or "kurta"
+        elif any(w in combined_text for w in bottom_keywords):
             category = "bottoms"
         elif any(w in combined_text for w in outerwear_keywords):
             category = "outerwear"

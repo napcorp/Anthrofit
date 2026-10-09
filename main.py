@@ -145,6 +145,14 @@ async def serve_app():
         return HTMLResponse(content=f.read())
 
 
+@app.get("/os", response_class=HTMLResponse)
+@app.get("/b2b", response_class=HTMLResponse)
+async def serve_os():
+    tmpl_path = os.path.join(BASE_DIR, "templates", "index.html")
+    with open(tmpl_path, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+
 @app.get("/health")
 async def health_check():
     """Health check probe for production load balancers and orchestrators."""
