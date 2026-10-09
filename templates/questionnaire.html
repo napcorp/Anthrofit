@@ -1467,6 +1467,7 @@ let S = {
   pBrand: '',
   pName: '',
   pCat: 'tops',
+  pSubcat: '',
   pSizes: ['S','M','L'],
   anchorId: null,
   pref: 'true_to_anchor',
@@ -1801,6 +1802,7 @@ async function doAiLookup(query){
     S.pBrand = data.brand || '';
     S.pName = data.name || '';
     S.pCat = data.category || 'tops';
+    S.pSubcat = data.subcategory || '';
     S.pSizes = data.available_sizes || [];
     S.pUrl = data.url || url;
 
@@ -1963,6 +1965,7 @@ async function handleGarmentPhotoFile(input){
     S.pBrand = data.brand || '';
     S.pName = data.name || '';
     S.pCat = detectedCat;
+    S.pSubcat = data.subcategory || '';
     S.pSizes = data.available_sizes || [];
 
     // Render preview card with thumbnail
@@ -2315,7 +2318,11 @@ function buildResultCard(v){
     </div>
   ` : '';
 
-  const cadWireframeHtml = `
+  // Indian / draped garments don't have structured CAD cutting patterns — skip wireframe
+  const _indianSubcats = ['sari_blouse','kurta','lehenga','sherwani','anarkali','kurti','kameez','churidar','salwar','dupatta'];
+  const _isIndianGarment = _indianSubcats.includes((S.pSubcat || '').toLowerCase());
+
+  const cadWireframeHtml = _isIndianGarment ? '' : `
     <div class="cad-silhouette-container">
       <div class="cad-badge-row">
         <span class="cad-title">
